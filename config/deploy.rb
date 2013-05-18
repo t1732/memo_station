@@ -1,10 +1,30 @@
+# -*- coding: utf-8 -*-
+require "capistrano/ext/multistage"
+require "bundler/capistrano"
+# require "rvm/capistrano"
+
+# set :stage, "production"
+
 set :application, "memo_station"
-set :repository, "file:///var/svn/#{application}/trunk"
+set :repository, Pathname("~/src/#{application}").expand_path.to_s
+set :group_writable, false      # chmod g+w されたときにエラーがでるんでしかたなく
+set :scm, :git
 
-role :web, "localhost"
-role :app, "localhost"
-role :db,  "localhost", :primary => true
+set :bundle_flags, "--deployment --verbose"
+# set :bundle_flags, "--verbose"
 
-set :deploy_to, "/var/www/#{application}"
-set :user, "deploy"
-set :use_sudo, false
+# set :git_shallow_clone, 1
+# set :deploy_via, :remote_cache
+
+# RVMを利用時の設定
+# $:.unshift(File.expand_path('./lib', ENV['rvm_path']))
+# set :rvm_ruby_string, '1.9.3'
+# set :rvm_type, :system
+
+namespace :deploy do
+  task(:start){}
+  task(:stop){}
+  task :restart, :roles => :app, :except => { :no_release => true } do
+    run "#{try_sudo} touch #{File.join(current_path, 'tmp', 'restart.txt')}"
+  end
+end

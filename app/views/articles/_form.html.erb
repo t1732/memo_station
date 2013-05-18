@@ -1,0 +1,33 @@
+<%= form_for(@article) do |f| %>
+  <% if @article.errors.any? %>
+    <%= content_tag(:div, :id => "error_explanation") do %>
+      <%= content_tag(:h2, "#{@article.errors.count}個のエラーがあります") %>
+      <%= content_tag(:ul) do %>
+        <% @article.errors.full_messages.each do |msg| %>
+          <%= content_tag(:li, msg) %>
+        <% end %>
+      <%- end -%>
+    <% end %>
+  <% end %>
+  <%= content_tag(:div, :class => "clearfix") do %>
+    <%= f.label(:title) %>
+    <%= content_tag(:div, :class => "input") do %>
+      <%= f.text_field :title, :class => "span11" %>
+    <% end %>
+  <% end %>
+  <%= content_tag(:div, :class => "clearfix") do %>
+    <%= f.label(:tag_list) %>
+    <%= content_tag(:div, :class => "input") do %>
+      <%= f.text_field :tag_list, :class => "span11" %>
+    <% end %>
+  <% end %>
+  <%= content_tag(:div, :class => "clearfix") do %>
+    <%= f.label(:body) %>
+    <%= content_tag(:div, :class => "input") do %>
+      <%= f.text_area :body, :rows => 16, :class => "span11" %>
+    <% end %>
+  <% end %>
+  <%= content_tag(:div, :class => "actions") do %>
+    <%= f.submit(:class => "btn primary") %>
+  <% end %>
+<% end %>

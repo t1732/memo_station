@@ -1,0 +1,5 @@
+<% @page_title ||= @article.title %>
+<% if notice %>
+  <%= content_tag(:p, notice, :id => "notice") %>
+<% end %>
+<%= render "show", :article => @article %>

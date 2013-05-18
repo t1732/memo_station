@@ -1,0 +1,6 @@
+<% @page_title ||= Article.human_attribute_name(:edit) %>
+
+<%= content_tag(:section) do %>
+  <%= content_tag(:h3, @page_title) %>
+  <%= render 'form' %>
+<% end %>

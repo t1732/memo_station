@@ -1,6 +1,6 @@
-;;; memo-station.el --- メモステモード
+;;; memo-station.el --- メモを集中管理する
 
-;; Copyright (C) 2002,2006  Free Software Foundation, Inc.
+;; Copyright (C) 2002,2006,2011,2012 Free Software Foundation, Inc.
 
 ;; Author: Akira Ikeda <pinpon.ikeda@gmail.com>
 ;; Keywords: program text
@@ -53,11 +53,8 @@
   :type 'boolean
   :group 'memo-station)
 
-(defvar memo-station-url "http://127.0.0.1:3000/"
+(defvar memo-station-url "http://localhost:3000/"
   "*GET/POSTするURL")
-
-(defvar memo-station-from "ikeda"
-  "*メモを作成するときのデフォルトユーザー")
 
 (defvar memo-station-auth-user nil
   "*BASIC認証のユーザー名")
@@ -353,7 +350,7 @@
   (setq major-mode 'memo-station-mode)
   (setq mode-name "メモステモード")
   (use-local-map memo-station-mode-map)
-  (memo-station-color)
+  ;; (memo-station-color)
   (setq buffer-read-only t)
   (run-hooks 'memo-station-mode-hook))
 
@@ -363,9 +360,9 @@
   (let (result)
     (if nil
         (setq result
-              (shell-command-on-region (point-min) (point-max) "~/src/memo_station/script/runner 'Article.text_post(STDIN.read).display'" nil))
+              (shell-command-on-region (point-min) (point-max) "~/src/memo-station/script/runner 'Article.text_post(STDIN.read).display'" nil))
       (setq result
-            (memo-station-http-fetch (concat memo-station-url "article/text_post") 'post (list (cons "content" (http-url-hexify-string (buffer-string) 'utf-8)))))
+            (memo-station-http-fetch (concat memo-station-url "articles/text_post") 'post (list (cons "content" (http-url-hexify-string (buffer-string) 'utf-8)))))
       )
     (memo-station-mode)
     (memo-station-goto-segment)
@@ -400,15 +397,13 @@
     (if (get-buffer buffname)
         (switch-to-buffer buffname)
       (switch-to-buffer buffname)
-      (insert "Subject: \n"
-              "Url: \n"
-              "From: " memo-station-from "\n"
+      (insert "Title: \n"
               "Tag: \n"
               "--text follows this line--\n"
               (or select-str "")
               )
       (when t
-        ;; 「Subject:」の直後にカーソル移動
+        ;; 「Title:」の直後にカーソル移動
         (beginning-of-buffer)
         (move-end-of-line 1)
         )
@@ -431,7 +426,7 @@
       ;;           )
       ;;       )
       ;; 英単語であれば問題ないが、日本語のタグだと http-url-hexify-string を通さないと正確に渡せない。
-      (setq content (memo-station-http-fetch (concat memo-station-url "article/text_get") 'get (list (cons "query" (http-url-hexify-string tag 'utf-8)))))
+      (setq content (memo-station-http-fetch (concat memo-station-url "articles.txt") 'get (list (cons "query" (http-url-hexify-string tag 'utf-8)))))
       (setq memo-station-before-buffer (current-buffer))
       (setq memo-station-save-window (current-window-configuration))
       (when (get-buffer buffname)
@@ -441,6 +436,7 @@
       (goto-char (point-min))
       (memo-station-mode)
       )))
+;; (memo-station-search "x")
 
 (defun memo-station-http-fetch (url method data)
   (interactive)

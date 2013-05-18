@@ -1,241 +1,48 @@
-# Schema as of 2006/08/01 06:58:50 (schema version 9)
-#
-#  id                  :integer(11)   not null
-#  subject             :string(255)
-#  url                 :string(255)
-#  body                :text
-#  access_count        :integer(11)   default(0)
-#  access_date         :datetime
-#  created_at          :datetime
-#  updated_at          :datetime
-#  user_id             :integer(11)
-#  modified_at         :datetime      not null
-#
+# -*- coding: utf-8 -*-
 
 class Article < ActiveRecord::Base
-  belongs_to :user
-  has_many :article_view_logs, :order => "created_at DESC"
-  has_many :users, :through => :article_view_logs
-
+  include EmacsMethods
   acts_as_taggable
 
-  validates_presence_of :subject, :user_id, :tag_list
-  validates_uniqueness_of :subject
+  attr_accessible :title, :body, :tag_list
 
-  delegate :logger, :to => "self.class"
-  delegate :debug, :to => "self.class.logger"
+  default_scope order(arel_table[:updated_at].desc)
 
-  # るびまの記事からメモした場合には同じURLで複数登録してしまうことがある。
-  # なのでURL重複チェックは入れないほうがいい。
-  # と、判断したものの、重複して登録できるメリットより、
-  # 間違って重複させてしまうデメリットの方が大きいような気もする。
-  # 現状、すでに重複したURLが入ってしまっているので、とりあえず重複チェックはやめにする。
-  if false
-    validates_uniqueness_of :url, :if => Proc.new{|article|!article.url.blank?}
-  end
-
-  # Emacsからポストできる正しいテキストかを確認する
-  def self.text_format_ok?(article_str)
-    article_str.include?("Subject:") && article_str.include?("Tag:") && article_str.include?("From:")
-  end
-
-  # ポストされたテキストから使えるものだけを抽出する
-  def self.text_post_cleanup(articles_str)
-    articles = articles_str.split(/^-{80,}$/)
-    articles.find_all{|article|text_format_ok?(article)}
-  end
-
-  # ポストしたテキストをまとめて処理する
-  def self.text_post(articles_str, controller = nil)
-    out = ""
-    articles = text_post_cleanup(articles_str)
-    out << "個数: #{articles.size}\n"
-    out << "#{articles.inspect}\n" if $DEBUG
-    logger.debug(articles)
-    articles.each{|article|
-      out << self.text_post_one(article, controller)
-    }
-    out
-  end
-
-  # 一つの記事だけを処理する
-  def self.text_post_one(article_str, controller)
-    article_str = article_str.toutf8
-    if md = article_str.match(/^Id:[ \t]*(\d+)$/i)
-      id = md.captures.first.to_i
+  before_validation :normalize
+  def normalize
+    if changes.has_key?("title")
+      self.title = title.to_s.squish.presence
     end
-    if md = article_str.match(/^Subject:[ \t]*(.+)$/i)
-      subject = md.captures.first.ja_clean
+    if changes.has_key?("body")
+      self.body = body.to_s.strip.presence
     end
-    if md = article_str.match(/^Url:[ \t]*(.+)$/i)
-      url = md.captures.first.ja_clean
-    end
-    if md = article_str.match(/^Tag:[ \t]*(.+)$/i)
-      tag = md.captures.first.ja_clean
-    end
-    if md = article_str.match(/^From:[ \t]*(.+)$/i)
-      from = md.captures.first.ja_clean
-    end
-    if md = article_str.match(/^--text follows this line--\n(.*)\z/mi)
-      contents = md.captures.first.ja_strip
-    end
-    if id
-      obj = Article.find(id)
-      pre_obj = obj.clone
-    else
-      obj = Article.new
-    end
-    before_article = obj.dup
-    obj.attributes = {:subject => subject, :body => contents, :url => url}
-    obj.tag_list = tag
-    obj.user = User.find_by_loginname(from)
-    if obj.new_record?
-      do_save = true
-    else
-      unless obj.contents_equal?(pre_obj)
-        do_save = true
-      end
-    end
-    if do_save
-      if obj.new_record?
-        status = "create"
-      else
-        status = "update"
-      end
-      if obj.save
-        # Mailman.deliver_article_update(controller, Time.now, :article => {:before => before_article, :after => obj})
-        save_result = "OK"
-      else
-        save_result = "Error #{obj.errors.full_messages}"
-      end
-    else
-      status = "skip"
-    end
-    "#{obj.id}: #{obj.subject} #{status} #{save_result}".rstrip + "\n"
+    true
   end
 
-  # sparklines 用(FIXME: cast を使わない方法に治す)
-  def self.distribution
-    articles = self.count(:group => "cast(created_at as date)")
-    logger.debug(articles.inspect)
-    distribution = []
-    (Time.now.beginning_of_day.months_ago(1).to_date .. Time.now.beginning_of_day.to_date).each{|day|
-      count = 0
-      if find = articles.assoc(day.to_s)
-        count = find.last
-      end
-      distribution << count
-    }
-    distribution
-  end
+  # validates :tag_list, :presence => true, :format => %r/\A[^%{}\#\^\$]+\z/i
+  validates :tag_list, :presence => true
+  validates :title, :presence => true, :uniqueness => true
+  # validates :body, :allow_blank => true
+end
 
-  # MySQLでエクスポートするときのテンポラリファイル名
-  # [RAILS_ROOT]/tmp にすると権限の問題で書けないことがあるので /tmp に変更
-  def self.export_mysql_csv_path
-    if false
-      Pathname("#{RAILS_ROOT}/tmp/export.csv.#{create_new_id}").expand_path
-    else
-      Pathname("/tmp/export.csv.#{create_new_id}").expand_path
-    end
-  end
+if $0 == __FILE__
+  Article.logger = ActiveSupport::BufferedLogger.new(STDOUT)
+  ActiveSupport::LogSubscriber.colorize_logging = false
+  Article.delete_all
+  ActsAsTaggableOn::Tagging.delete_all
+  ActsAsTaggableOn::Tag.delete_all
 
-  # MySQLの機能を使って直接CSVエクスポート
-  # 高速に処理できるけどテーブルをまたぐデータを履かせるのが大変
-  def self.export_mysql_csv
-    path = export_mysql_csv_path
-    connection.execute(%Q(select a.id, a.subject, a.url, u.loginname, a.body, a.access_count, a.created_at into outfile #{connection.quote(path.to_s)} fields terminated by ',' optionally enclosed by '"' escaped by '' lines terminated by '\n' from articles as a, users as u where a.user_id = u.id))
-    path
-  end
+  str = "escape_char = '%'\n[\n  \"\\n%{foo}\",\n  \"\\t%{foo}\",\n  \"\\%{foo}\",\n  \"%{foo}\",\n  \"\#{escape_char}%{foo}\",\n].each{|str|\n  p [str, (str.match(/(?:[^\#{escape_char}]|^)%\\{(\\w+)\\}/) ? \"OK\" : \"\")]\n}\n\n# [^\#{escape_char}] と書けば \"%%{foo}\" は無視されるが、\n# \"%{foo}\" の先頭が何にもマッチしないため通らなくなる\n# そこで「% 以外」または「行頭」という設定が必要になり、\n# 結果、(?:[^\#{escape_char}]|^) と書けばよい\n\nしかし、%%{foo} と書いたときは %%{foo} を残すのではなく %{foo} に変換したいという場合は次のように書く\n\nescape_char = '%'\n[\n  \" %{foo}\",\n  \"\\n%{foo}\",\n  \"%{foo}\",\n  \"\#{escape_char}%{foo}\",\n].each{|str|\n  str3 = str.gsub(/(\#{escape_char}?(%\\{(\\w+)\\}))/){|str2|\n    escaped_match, match, key = Regexp.last_match.captures\n    if escaped_match.match(/\\A\#{escape_char}%/)\n      match\n    else\n      \"【\#{key}】\"\n    end\n  }\n  p [str, str3]\n}"
 
-#   # 人気メモ
-#   def self.most_viewed(options = {})
-#     options = {:order => "access_count DESC, created_at DESC", :limit => 10}.merge(options)
-#     find(:all, options)
-#   end
+  a = Article.new(:title => rand.to_s, :body => "str")
+  a.tag_list = "a b"
+  a.save!
 
-  # 人気メモ数
-  def self.most_viewed_count(before_time)
-#     ArticleViewLog.count(:distinct => true, :select => "article_id")
-#     raise ArticleViewLog.count("distinct article_id", :conditions => nil).inspect
-    ArticleViewLog.count(:distinct => true, :select => "article_id", :conditions => ["created_at >= ?", before_time])
-#     ArticleViewLog.count("distinct article_id", :conditions => ["created_at >= ?", before_time])
-  end
+  # a.tag_list = ""
+  # a.save!
 
-  # 人気メモ
-  def self.most_viewed(before_time, options = {})
-    Article.find_by_sql("select articles.*, count(article_view_logs.article_id) as article_id_count_all from article_view_logs left join articles on articles.id = article_view_logs.article_id WHERE article_view_logs.created_at >= '#{before_time}' group by article_view_logs.article_id order by article_id_count_all DESC LIMIT #{options[:offset]},#{options[:limit]}")
-  end
-
-  # ToDo: urlの正規化
-  def before_validation
-    self.subject = self.subject.to_s.ja_clean
-    if self.url
-      self.url = self.url.to_s.ja_strip.sub(%r{^h?t?tp(s?)://}io, 'http\1://')
-    end
-    self.body = self.body.to_s.map{|line|line.ja_rstrip + "\n"}.to_s.strip
-  end
-
-  def before_save
-    self.access_date ||= Time.now
-    self.modified_at ||= Time.now
-    if self.url.blank?
-      self.url = nil
-      self.url_access_at = nil
-     else
-      self.url_access_at ||= Time.now
-    end
-  end
-
-  # bodyかurlが変更されたときのみ modified_at を更新する。
-  def before_update
-    pre_article = self.class.find(self.id)
-    if pre_article.body != self.body || pre_article.url != self.url
-      self.modified_at = Time.now
-    end
-  end
-
-  # フォーム用
-  def tag_list
-    self.tag_names * " "
-  end
-
-  def tag_list=(tags)
-    self.tag(tags, :clear => true, :separator => proc{|t|t.split(TAG_SEPARATOR)})
-  end
-
-  # other の tag_names は常に空。比較はできないので注意。
-  def contents_equal?(other)
-    subject.to_s.strip == other.subject.to_s.strip && body.to_s.strip == other.body.to_s.strip && url.to_s.strip == other.url.to_s.strip
-  end
-
-  def to_text
-    str = ""
-    str << "Id: #{self.id}\n" unless self.new_record?
-    str << "Subject: #{self.subject}\n"
-    str << "Url: #{self.url}\n"
-    str << "From: #{self.user.loginname}\n"
-    str << "Tag: #{self.tag_list}\n"
-    str << "Created at: #{self.created_at}\n" unless self.new_record?
-    str << "--text follows this line--\n"
-    str << "#{self.body}\n"
-    str
-  end
-
-  # CSV出力用データ
-  def export_row
-    [id, subject, url, user.loginname, tag_list, body, access_count, created_at]
-  end
-
-  private
-  # MySQLでCSVを吐くのときのテンポラリファイル用
-  def self.create_new_id
-    require "digest/md5"
-    md5 = Digest::MD5::new
-    now = Time.now
-    md5.update(now.to_s)
-    md5.update(now.usec.to_s)
-    md5.update(rand.to_s)
-    md5.update($$.to_s)
-    md5.hexdigest
-  end
+  # p a.tag_list.to_s
+  # Article.related_tags_for("tags",
+  # p Article.tagged_with("c b").order("id asc").limit(2).collect{|r|[r.id, r.tag_list.to_s]}
+  # p Article.tagged_with(" ").order("id asc").limit(2).collect{|r|[r.id, r.tag_list.to_s]}
 end
