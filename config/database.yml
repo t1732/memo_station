@@ -1,0 +1,21 @@
+# $Id$
+
+defaults: &defaults
+  adapter: mysql
+  username: root
+  password:
+  host: localhost
+  socket: <%= %w(/tmp/mysql.sock /var/run/mysqld/mysqld.sock).find{|socket|Pathname(socket).exist?} %>
+  encoding: utf8
+
+development:
+  database: memo_station_development
+  <<: *defaults
+
+test:
+  database: memo_station_test
+  <<: *defaults
+
+production:
+  database: memo_station_production
+  <<: *defaults
