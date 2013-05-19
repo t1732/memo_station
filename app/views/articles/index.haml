@@ -1,0 +1,2 @@
+- @page_title ||= params[:query]
+= render :partial => "show", :as => :article, :collection => @articles, :spacer_template => "spacer"

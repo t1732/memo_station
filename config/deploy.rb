@@ -1,25 +1,18 @@
 # -*- coding: utf-8 -*-
 require "capistrano/ext/multistage"
 require "bundler/capistrano"
-# require "rvm/capistrano"
+require "etc"
 
-# set :stage, "production"
+set :default_stage, :production
 
 set :application, "memo_station"
 set :repository, Pathname("~/src/#{application}").expand_path.to_s
 set :group_writable, false      # chmod g+w されたときにエラーがでるんでしかたなく
 set :scm, :git
+set :user, Etc.getlogin
 
-set :bundle_flags, "--deployment --verbose"
-# set :bundle_flags, "--verbose"
-
-# set :git_shallow_clone, 1
-# set :deploy_via, :remote_cache
-
-# RVMを利用時の設定
-# $:.unshift(File.expand_path('./lib', ENV['rvm_path']))
-# set :rvm_ruby_string, '1.9.3'
-# set :rvm_type, :system
+# set :bundle_flags, "--deployment --verbose"
+set :git_shallow_clone, 1
 
 namespace :deploy do
   task(:start){}

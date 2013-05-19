@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 class ArticlesController < ApplicationController
+  before_filter :load_object
+
   # GET /articles
   # GET /articles.xml
   def index
@@ -35,8 +37,6 @@ class ArticlesController < ApplicationController
   # GET /articles/1
   # GET /articles/1.xml
   def show
-    @article = Article.find(params[:id])
-
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @article }
@@ -46,8 +46,6 @@ class ArticlesController < ApplicationController
   # GET /articles/new
   # GET /articles/new.xml
   def new
-    @article = Article.new
-
     respond_to do |format|
       format.html # new.html.erb
       format.xml  { render :xml => @article }
@@ -56,13 +54,12 @@ class ArticlesController < ApplicationController
 
   # GET /articles/1/edit
   def edit
-    @article = Article.find(params[:id])
   end
 
   # POST /articles
   # POST /articles.xml
   def create
-    @article = Article.new(params[:article])
+    @article.assign_attributes(params[:article], :without_protection => true)
 
     respond_to do |format|
       if @article.save
@@ -94,12 +91,19 @@ class ArticlesController < ApplicationController
   # DELETE /articles/1
   # DELETE /articles/1.xml
   def destroy
-    @article = Article.find(params[:id])
     @article.destroy
 
     respond_to do |format|
       format.html { redirect_to(articles_url) }
       format.xml  { head :ok }
+    end
+  end
+
+  def load_object
+    if params[:id]
+      @article = Article.find(params[:id])
+    else
+      @article = Article.new
     end
   end
 end

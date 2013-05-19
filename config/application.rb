@@ -29,7 +29,6 @@ module MemoStation
     # Run "rake -D time" for a list of tasks for finding time zone names. Default is UTC.
     # config.time_zone = 'Central Time (US & Canada)'
     config.time_zone = "Tokyo"
-    config.active_record.default_timezone = :local
 
     # The default locale is :en and all translations from config/locales/*.rb,yml are auto loaded.
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
@@ -62,7 +61,6 @@ module MemoStation
     config.before_configuration do
       require Rails.root.join("config/app_config")
       config.app_config = AppConfig
-      # require Rails.root.join("config/available_settings")
     end
   end
 end

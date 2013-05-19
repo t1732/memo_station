@@ -84,6 +84,4 @@ MemoStation::Application.configure do
     :sender_address => AppConfig[:info_address],
     :exception_recipients => AppConfig[:exception_to],
   }
-
-  # config.middleware.use "::Rack::Maintenance", :file => Rails.root.join("public/system/maintenance.html")
 end

@@ -7,8 +7,8 @@ module ArticlesHelper
   def article_body(body)
     body = body.to_s
     body = html_escape(body)
-    # body = body.gsub(/\n/, tag(:br))
     body = simple_format(body)
+    body = auto_link(body)
     body.html_safe
   end
 
