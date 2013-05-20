@@ -1,0 +1,33 @@
+#+OPTIONS: toc:nil num:nil author:nil creator:nil \n:nil |:t
+#+OPTIONS: @:t ::t ^:t -:t f:t *:t <:t
+
+* 汎用メモリ管理アプリ
+
+** セットアップ
+
+   : bundle install
+   : bundle exec rake db:reset
+   : rails s
+   : open http://localhost:3000/
+
+** デプロイ
+
+   : bundle exec cap deploy:setup
+   : bundle exec cap deploy:migrations
+
+** Emacsインタフェースの準備
+
+   : cp -av lib/*.el ~/.emacs.d/lib
+   : emacs ~/.emacs.d/init.el
+
+   以下を設定
+
+   : (require 'memo-station)
+   : (setq memo-station-url "http://memo/")
+   : (global-unset-key "\C-j")
+   : (global-set-key (kbd "C-j w") 'memo-station-create)
+   : (global-set-key (kbd "C-j s") 'memo-station-search)
+
+   あと nkf が必須なので
+
+   : brew install nkf
