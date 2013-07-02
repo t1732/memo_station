@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 class ArticlesController < ApplicationController
-  before_filter :load_object
+  before_action :load_object
 
   # GET /articles
   # GET /articles.xml
@@ -59,7 +59,7 @@ class ArticlesController < ApplicationController
   # POST /articles
   # POST /articles.xml
   def create
-    @article.assign_attributes(params[:article], :without_protection => true)
+    @article.attributes = article_params
 
     respond_to do |format|
       if @article.save
@@ -78,7 +78,7 @@ class ArticlesController < ApplicationController
     @article = Article.find(params[:id])
 
     respond_to do |format|
-      if @article.update_attributes(params[:article])
+      if @article.update_attributes(article_params)
         format.html { redirect_to(@article, :notice => 'Article was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -105,5 +105,11 @@ class ArticlesController < ApplicationController
     else
       @article = Article.new
     end
+  end
+
+  private
+
+  def article_params
+    params.require(:article).permit(:title, :body, :tag_list)
   end
 end

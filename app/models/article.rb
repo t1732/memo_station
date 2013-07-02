@@ -4,9 +4,9 @@ class Article < ActiveRecord::Base
   include EmacsMethods
   acts_as_taggable
 
-  attr_accessible :title, :body, :tag_list
+  # attr_accessible :title, :body, :tag_list
 
-  default_scope order(arel_table[:updated_at].desc)
+  default_scope { order(arel_table[:updated_at].desc) }
 
   before_validation :normalize
   def normalize

@@ -5,8 +5,10 @@ require "etc"
 
 set :default_stage, :production
 
+set :branch, "ruby200_rails4"
+
 set :application, "memo_station"
-set :repository, Pathname("~/src/#{application}").expand_path.to_s
+set :repository, "file://" + Pathname("~/src/#{application}").expand_path.to_s
 set :group_writable, false      # chmod g+w されたときにエラーがでるんでしかたなく
 set :scm, :git
 set :user, Etc.getlogin

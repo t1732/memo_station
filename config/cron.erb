@@ -1,9 +1,0 @@
-# 以下の "<%= current_path %>" を含む行の設定は capistrano により管理されているため手動で変更しないでください
-# */2 * * * * cd <%= current_path %> && date >> <%= shared_path %>/log/cron/minutely.txt
-# */15  * * * * cd <%= current_path %> && rake RAILS_ENV=<%= rails_env %> chores:minutely            >> <%= shared_path %>/log/cron/minutely.txt
-# 0  */1  * * * cd <%= current_path %> && rake RAILS_ENV=<%= rails_env %> chores:hourly              >> <%= shared_path %>/log/cron/hourly.txt
-# 15 */3  * * * cd <%= current_path %> && rake RAILS_ENV=<%= rails_env %> chores:hourly2             >> <%= shared_path %>/log/cron/hourly2.txt
-0 0    * * * cd <%= current_path %> && rake RAILS_ENV=<%= rails_env %> chores:daily               >> <%= shared_path %>/log/cron/daily.txt
-# 0  0    * * 1 cd <%= current_path %> && rake RAILS_ENV=<%= rails_env %> chores:weekly              >> <%= shared_path %>/log/cron/weekly.txt
-# 0  0    1 * * cd <%= current_path %> && rake RAILS_ENV=<%= rails_env %> chores:monthly             >> <%= shared_path %>/log/cron/monthly.txt
-# 0 */1 1 * * cd <%= current_path %> && rake RAILS_ENV=<%= rails_env %> chores:monthly_with_hourly >> <%= shared_path %>/log/cron/monthly_with_hourly.txt
