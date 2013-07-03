@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
-module EmacsMethods
+module Emacsen
   extend ActiveSupport::Concern
-
-  included do
-  end
 
   module ClassMethods
     # Emacsからポストできる正しいテキストかを確認する

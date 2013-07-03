@@ -7,12 +7,12 @@ defaults: &defaults
 
 development:
   <<: *defaults
-  database: memoria_development
+  database: memo_station_development
 
 test:
   <<: *defaults
-  database: memoria_test
+  database: memo_station_test
 
 production:
   <<: *defaults
-  database: memoria_production
+  database: memo_station_production

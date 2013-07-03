@@ -10,7 +10,7 @@
     .navbar.navbar-inverse.navbar-fixed-top
       .navbar-inner
         .container-fluid
-          = link_to((content_tag(:span, "", class: "icon-bar") * 3).html_safe, "#", class: "btn btn-navbar", "data-toggle" => "collapse", "data-target" => ".nav-collapse")
+          = link_to((content_tag(:span, "", class: "icon-bar") * 3).html_safe, "#", class: "btn btn-navbar", :data => {:toggle => "collapse", :target => ".nav-collapse"})
           = link_to(AppConfig[:app_name], :root, class: "brand")
           %ul.nav
             %li
@@ -21,7 +21,8 @@
       .row-fluid
         .span12
           - if notice
-            %p#notice= notice
+            %p#notice
+              = notice
           = yield
     %footer.footer
       .container-fluid
