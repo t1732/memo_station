@@ -3,17 +3,21 @@
 
 * 汎用メモ管理アプリ
 
+  - [[https://travis-ci.org/akicho8/memo_station][Travis]]: [[https://travis-ci.org/akicho8/memo_station.png]]
+  - [[https://gemnasium.com/akicho8/memo_station/][Gemnasium]]: [[https://gemnasium.com/akicho8/memo_station.png]]
+  - [[https://codeclimate.com/github/akicho8/memo_station][Code Climate]]: [[https://codeclimate.com/github/akicho8/memo_station.png]]
+
 ** セットアップ
 
    : bundle install
-   : bundle exec rake db:reset
+   : rake db:reset
    : rails s
    : open http://localhost:3000/
 
 ** デプロイ
 
-   : bundle exec cap deploy:setup
-   : bundle exec cap deploy:migrations
+   : cap deploy:setup
+   : cap deploy:migrations
 
 ** Emacsインタフェースの準備
 

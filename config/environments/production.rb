@@ -82,7 +82,7 @@ MemoStation::Application.configure do
   #================================================================================
 
   # for ActionMailer
-  config.action_mailer.default_url_options = {:host => "memo_station"}
+  config.action_mailer.default_url_options = {:host => "memo"}
 
   # for AppConfig
   AppConfig.update({

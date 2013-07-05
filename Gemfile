@@ -51,10 +51,12 @@ gem 'bootstrap-sass-rails'
 gem 'haml-rails'
 gem 'kaminari'
 gem 'exception_notification_rails3', :require => 'exception_notifier'
-gem 'capistrano'
 gem 'acts-as-taggable-on'
-gem 'database_cleaner'
 gem 'rails_autolink'
-gem 'tapp'
 gem 'rspec-rails'
 gem 'factory_girl_rails'
+
+group :development, :test do
+  gem 'database_cleaner'
+  gem 'tapp'
+end
