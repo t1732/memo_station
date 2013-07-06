@@ -86,15 +86,7 @@ MemoStation::Application.configure do
 
   # for AppConfig
   AppConfig.update({
-      :info_address  => "ikeda@ikeda-mac.local",
-      :exception_to  => "ikeda@ikeda-mac.local", # エラー通知メール送信先
-      :developper_to => "ikeda@ikeda-mac.local", # 開発者への通知
-      :mail_bcc      => "ikeda@ikeda-mac.local", # 全監視用
+      :info_address  => "root@localhost",
+      :exception_to  => "root@localhost",
     })
-
-  config.middleware.use "::ExceptionNotifier", {
-    :email_prefix => "MemoStation-Errors: ",
-    :sender_address => AppConfig[:info_address],
-    :exception_recipients => AppConfig[:exception_to],
-  }
 end
