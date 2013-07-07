@@ -68,4 +68,34 @@ describe Article do
       proc { @article.destroy }.should change(Article, :count).by(-1)
     end
   end
+
+  describe "Emacsインタフェース" do
+    before do
+      Article.text_post("
+Title: タイトル
+Tag: b a
+--text follows this line--
+本文
+")
+    end
+
+    it "作成" do
+      article = Article.first
+      article.title.should == "タイトル"
+      article.body.should == "本文"
+      article.tag_list.should == ["b", "a"]
+    end
+
+    it "更新" do
+      Article.text_post("
+Id: #{Article.first.id}
+Title: タイトル
+Tag: a b c
+--text follows this line--
+本文2
+")
+      article = Article.first
+      article.tag_list.should == ["b", "a", "c"]
+    end
+  end
 end

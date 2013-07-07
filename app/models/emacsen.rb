@@ -31,7 +31,6 @@ module Emacsen
     # 一つの記事だけを処理する
     def text_post_one(article_str)
       article_str = article_str.force_encoding("UTF-8")
-
       if md = article_str.match(/^Id:\s*(\d+)$/i)
         id = md.captures.first.to_i
       end
@@ -44,28 +43,26 @@ module Emacsen
       if md = article_str.match(/^--text follows this line--\n(.*)\z/mi)
         body = md.captures.first
       end
+      original_tag_list = ""
       if id
         article = Article.find(id)
         pre_article = article.dup # cloneはだめ
+        original_tag_list = article.tag_list
       else
         article = Article.new
       end
       article.attributes = {:title => title, :body => body}
       article.tag_list = tag
-      if article.new_record?
-        do_save = true
-      else
-        # Rails.logger.debug(article.attributes.pretty_inspect)
-        # Rails.logger.debug(pre_article.attributes.pretty_inspect)
-        unless article.contents_equal?(pre_article)
-          do_save = true
-        end
-      end
+
+      do_save = article.new_record?
+      do_save ||= !article.contents_equal?(pre_article)
+      do_save ||= original_tag_list.sort != article.tag_list.sort
+
       if do_save
         if article.new_record?
           status = "A"
         else
-          status = "M"
+          status = "U"
         end
         if article.save
           save_result = "OK"
