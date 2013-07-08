@@ -5,14 +5,14 @@ module Emacsen
 
   module ClassMethods
     # Emacsからポストできる正しいテキストかを確認する
-    def text_format_ok?(article_str)
+    def text_resolve?(article_str)
       article_str.include?("Title:") && article_str.include?("Tag:")
     end
 
     # ポストされたテキストから使えるものだけを抽出する
     def text_post_cleanup(articles_str)
       articles = articles_str.split(/^-{80,}$/)
-      articles.find_all{|article|text_format_ok?(article)}
+      articles.find_all{|article|text_resolve?(article)}
     end
 
     # ポストしたテキストをまとめて処理する
@@ -43,22 +43,22 @@ module Emacsen
       if md = article_str.match(/^--text follows this line--\n(.*)\z/mi)
         body = md.captures.first
       end
-      original_tag_list = ""
+      old_tag_list = ""
       if id
         article = Article.find(id)
         pre_article = article.dup # cloneはだめ
-        original_tag_list = article.tag_list
+        old_tag_list = article.tag_list
       else
         article = Article.new
       end
       article.attributes = {:title => title, :body => body}
       article.tag_list = tag
 
-      do_save = article.new_record?
-      do_save ||= !article.contents_equal?(pre_article)
-      do_save ||= original_tag_list.sort != article.tag_list.sort
+      save_p = article.new_record?
+      save_p ||= !article.content_equal?(pre_article)
+      save_p ||= old_tag_list.sort != article.tag_list.sort
 
-      if do_save
+      if save_p
         if article.new_record?
           status = "A"
         else
@@ -76,15 +76,24 @@ module Emacsen
     end
 
     def collection_to_txt(records)
-      separator = "-" * 80 + "\n"
-      output = separator + records.collect{|article|article.to_text}.join(separator) + separator
-      # output + "-- content end --\n"
+      [
+        separator,
+        records.collect(&:to_text).join(separator),
+        separator,
+      ].join
+    end
+
+    def separator
+      @separator ||= "-" * 80 + "\n"
     end
   end
 
   # other の tag_names は常に空。比較はできないので注意。
-  def contents_equal?(other)
-    title.to_s.strip == other.title.to_s.strip && body.to_s.strip == other.body.to_s.strip
+  def content_equal?(other)
+    [
+      title.to_s.strip == other.title.to_s.strip,
+      body.to_s.strip == other.body.to_s.strip,
+    ].all?
   end
 
   def to_text

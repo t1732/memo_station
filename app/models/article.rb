@@ -22,6 +22,6 @@ class Article < ActiveRecord::Base
   end
 
   with_options(:allow_blank => true) do |o|
-    o.validates :title, :presence => true, :uniqueness => true
+    o.validates :title, :uniqueness => true
   end
 end
