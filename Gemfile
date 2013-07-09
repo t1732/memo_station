@@ -48,7 +48,7 @@ gem 'capistrano', group: :development
 
 gem 'font-awesome-sass-rails'
 gem 'bootstrap-sass-rails'
-gem 'haml-rails'
+gem 'slim'
 gem 'kaminari'
 gem "exception_notification", :github => "smartinez87/exception_notification"
 

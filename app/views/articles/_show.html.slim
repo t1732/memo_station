@@ -1,0 +1,9 @@
+h4
+  = link_to article.title, article
+= article_body article.body
+p
+  = article_tag_list article.tag_list
+  p.muted
+    = article.created_at.strftime("%Y-%m-%d %H:%M")
+    = link_to bootstrap_icon(:edit), [:edit, article]
+    = link_to bootstrap_icon(:trash), article, :confirm => "本当に削除しますか？", :method => :delete

@@ -2,9 +2,9 @@
   - if @article.errors.any?
     = content_tag(:div, :id => "error_explanation") do
       = content_tag(:h2, "#{@article.errors.count}個のエラーがあります")
-      %ul
+      ul
         - @article.errors.full_messages.each do |msg|
-          %li
+          li
             = msg
   .control-group
     = f.label(:title, :class => "control-label")
