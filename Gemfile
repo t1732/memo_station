@@ -50,7 +50,7 @@ gem 'font-awesome-sass-rails'
 gem 'bootstrap-sass-rails'
 gem 'slim'
 gem 'kaminari'
-gem "exception_notification", :github => "smartinez87/exception_notification"
+gem "exception_notification"
 
 gem 'acts-as-taggable-on'
 gem 'rails_autolink'
