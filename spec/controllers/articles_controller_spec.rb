@@ -3,6 +3,13 @@
 require "spec_helper"
 
 describe ArticlesController do
+  # context do
+  #   it do
+  #     get :index
+  #     response.should be_success
+  #   end
+  # end
+
   context "Emacs対応" do
     it "書き込みできる" do
       post :text_post, :content => "

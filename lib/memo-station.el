@@ -450,7 +450,9 @@
                     (set-buffer access_result_buffer)
                     ;; FIXME: http経由で取り出すと文字化けした状態で UTF-8 が来る。
                     ;; よくわからないけど nkf -w すると読める UTF-8 になる。
+                    
                     (shell-command-on-region (point-min) (point-max) "nkf -w -d" (current-buffer) t) ;REPLACEをtにするとバッファを表示しなくなる。
+                    
                     ;; (encode-coding-string (buffer-string) 'utf-8 nil (current-buffer))
                     ;; ヘッダを除いた部分のみを取得
                     (buffer-substring
