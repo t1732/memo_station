@@ -59,5 +59,6 @@ gem 'factory_girl_rails'
 
 group :development, :test do
   gem 'database_cleaner'
+  gem 'timecop'
   gem 'tapp'
 end

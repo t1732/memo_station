@@ -3,6 +3,10 @@
 module Emacsen
   extend ActiveSupport::Concern
 
+  included do
+    cattr_accessor(:text_separator) { "--text follows this line--" }
+  end
+
   module ClassMethods
     # Emacsからポストできる正しいテキストかを確認する
     def text_resolve?(article_str)
@@ -40,7 +44,7 @@ module Emacsen
       if md = article_str.match(/^Tag:(.+)$/i)
         tag = md.captures.first.strip
       end
-      if md = article_str.match(/^--text follows this line--\n(.*)\z/mi)
+      if md = article_str.match(/^#{text_separator}\n(.*)\z/mi)
         body = md.captures.first
       end
       old_tag_list = ""
@@ -101,8 +105,8 @@ module Emacsen
     str << "Id: #{id}"
     str << "Title: #{title}"
     str << "Tag: #{tag_list}"
-    str << "Date: #{created_at}"
-    str << "--text follows this line--"
+    str << "Date: #{created_at.to_s(:ymdhm)}"
+    str << text_separator
     str << "#{body}"
     str.join("\n") + "\n"
   end
