@@ -34,48 +34,37 @@ module Emacsen
 
     # 一つの記事だけを処理する
     def text_post_one(article_str)
-      article_str = article_str.force_encoding("UTF-8")
-      if md = article_str.match(/^Id:\s*(\d+)$/i)
-        id = md.captures.first.to_i
-      end
-      if md = article_str.match(/^Title:(.+)$/i)
-        title = md.captures.first.strip
-      end
-      if md = article_str.match(/^Tag:(.+)$/i)
-        tag = md.captures.first.strip
-      end
-      if md = article_str.match(/^#{text_separator}\n(.*)\z/mi)
-        body = md.captures.first
-      end
+      attrs = read_attributes(article_str)
+
       old_tag_list = ""
-      if id
-        article = Article.find(id)
+      if attrs[:id]
+        article = Article.find(attrs[:id])
         pre_article = article.dup # cloneはだめ
         old_tag_list = article.tag_list
       else
         article = Article.new
       end
-      article.attributes = {:title => title, :body => body}
-      article.tag_list = tag
+      article.attributes = attrs.slice(:title, :body, :tag_list)
 
       save_p = article.new_record?
       save_p ||= !article.content_equal?(pre_article)
       save_p ||= old_tag_list.sort != article.tag_list.sort
 
+      status = " "
       if save_p
-        if article.new_record?
-          status = "A"
-        else
-          status = "U"
-        end
+        status = article.new_record? ? "A" : "U"
         if article.save
           save_result = "OK"
         else
           save_result = "Error #{article.errors.full_messages}"
         end
-      else
-        status = " "
       end
+
+      if article.tag_list.include?("_del")
+        article.destroy
+        status << "D"
+      end
+
       "#{status} [#{article.id}] #{article.title} #{save_result}".rstrip + "\n"
     end
 
@@ -87,8 +76,28 @@ module Emacsen
       ].join
     end
 
+    private
+
     def separator
       @separator ||= "-" * 80 + "\n"
+    end
+
+    def read_attributes(str)
+      {}.tap do |attrs|
+        str = str.force_encoding("UTF-8")
+        if md = str.match(/^Id:\s*(\d+)$/i)
+          attrs[:id] = md.captures.first.to_i
+        end
+        if md = str.match(/^Title:(.+)$/i)
+          attrs[:title] = md.captures.first.strip
+        end
+        if md = str.match(/^Tag:(.+)$/i)
+          attrs[:tag_list] = md.captures.first.strip
+        end
+        if md = str.match(/^#{text_separator}\n(.*)\z/mi)
+          attrs[:body] = md.captures.first
+        end
+      end
     end
   end
 

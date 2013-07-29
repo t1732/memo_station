@@ -72,40 +72,42 @@ describe Article do
   describe "Emacsインタフェース" do
     before do
       Article.text_post("
-Title: タイトル
+Title: (title)
 Tag: b a
 --text follows this line--
-本文
+(body)
 ")
       @article = Article.first
     end
 
     it "作成できる" do
-      @article.title.should == "タイトル"
-      @article.body.should == "本文"
+      @article.title.should == "(title)"
+      @article.body.should == "(body)"
       @article.tag_list.should == ["b", "a"]
     end
 
     it "更新できる" do
       Article.text_post("
 Id: #{@article.id}
-Title: タイトル
+Title: (title2)
 Tag: a b c
 --text follows this line--
-本文2
+(body2)
 ")
       @article.reload
+      @article.title == "(title2)"
       @article.tag_list.should == ["b", "a", "c"]
+      @article.body.should == "(body2)"
     end
 
     it "参照できる" do
       @article.to_text.should == <<-EOT.strip_heredoc
 Id: #{@article.id}
-Title: タイトル
+Title: (title)
 Tag: b a
 Date: 2000-01-01 00:00
 --text follows this line--
-本文
+(body)
 EOT
     end
   end
