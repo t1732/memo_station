@@ -9,20 +9,19 @@ module Emacsen
 
   module ClassMethods
     # Emacsからポストできる正しいテキストかを確認する
-    def text_resolve?(article_str)
-      article_str.include?("Title:") && article_str.include?("Tag:")
+    def text_resolve?(str)
+      str.include?("Title:") && str.include?("Tag:")
     end
 
     # ポストされたテキストから使えるものだけを抽出する
-    def text_post_cleanup(articles_str)
-      articles = articles_str.split(/^-{80,}$/)
-      articles.find_all{|article|text_resolve?(article)}
+    def text_post_cleanup(strs)
+      strs.split(/^-{80,}$/).find_all{|article|text_resolve?(article)}
     end
 
     # ポストしたテキストをまとめて処理する
-    def text_post(articles_str)
+    def text_post(strs)
       out = ""
-      articles = text_post_cleanup(articles_str)
+      articles = text_post_cleanup(strs)
       out << "個数: #{articles.size}\n"
       out << "#{articles.inspect}\n" if $DEBUG
       logger.debug(articles)
@@ -33,8 +32,8 @@ module Emacsen
     end
 
     # 一つの記事だけを処理する
-    def text_post_one(article_str)
-      attrs = read_attributes(article_str)
+    def text_post_one(str)
+      attrs = attributes_for(str)
 
       old_tag_list = ""
       if attrs[:id]
@@ -50,22 +49,24 @@ module Emacsen
       save_p ||= !article.content_equal?(pre_article)
       save_p ||= old_tag_list.sort != article.tag_list.sort
 
-      status = " "
+      errors = ""
+      mark = " "
       if save_p
-        status = article.new_record? ? "A" : "U"
+        mark = article.new_record? ? "A" : "U"
         if article.save
-          save_result = "OK"
         else
-          save_result = "Error #{article.errors.full_messages}"
+          mark = "E"
+          errors = article.errors.full_messages.join(" ")
         end
       end
 
+      delmark = " "
       if article.tag_list.include?("_del")
         article.destroy
-        status << "D"
+        delmark = "D"
       end
 
-      "#{status} [#{article.id}] #{article.title} #{save_result}".rstrip + "\n"
+      "#{mark + delmark} [#{article.id}] #{article.title} #{errors}".rstrip + "\n"
     end
 
     def collection_to_txt(records)
@@ -82,7 +83,7 @@ module Emacsen
       @separator ||= "-" * 80 + "\n"
     end
 
-    def read_attributes(str)
+    def attributes_for(str)
       {}.tap do |attrs|
         str = str.force_encoding("UTF-8")
         if md = str.match(/^Id:\s*(\d+)$/i)
