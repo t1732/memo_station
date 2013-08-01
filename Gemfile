@@ -54,10 +54,11 @@ gem "exception_notification"
 
 gem 'acts-as-taggable-on'
 gem 'rails_autolink'
-gem 'rspec-rails'
-gem 'factory_girl_rails'
+gem 'jquery-turbolinks'
 
 group :development, :test do
+  gem 'rspec-rails'
+  gem 'factory_girl_rails'
   gem 'database_cleaner'
   gem 'timecop'
   gem 'tapp'
