@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
 class ArticlesController < ApplicationController
-  before_action :load_object
+  before_action :set_article, only: [:show, :edit, :update, :destroy]
 
-  # GET /articles
-  # GET /articles.xml
   def index
     if params.has_key?(:query)
       @articles = Article.tagged_with(params[:query]).limit(params[:limit] || 100)
@@ -29,85 +27,58 @@ class ArticlesController < ApplicationController
   end
 
   def render_text_for_emacs(str)
-    # headers["Content-Type"] = "text/plain; charset=UTF-8"
     render :text => str + "-- content end --" + "\n"
-    # render :txt => @articles
   end
 
-  # GET /articles/1
-  # GET /articles/1.xml
   def show
-    respond_to do |format|
-      format.html # show.html.erb
-      format.xml  { render :xml => @article }
-    end
   end
 
-  # GET /articles/new
-  # GET /articles/new.xml
   def new
-    respond_to do |format|
-      format.html # new.html.erb
-      format.xml  { render :xml => @article }
-    end
+    @article = Article.new
   end
 
-  # GET /articles/1/edit
   def edit
   end
 
-  # POST /articles
-  # POST /articles.xml
   def create
-    @article.attributes = article_params
+    @article = Article.new(article_params)
 
     respond_to do |format|
       if @article.save
-        format.html { redirect_to(@article, :notice => 'Article was successfully created.') }
-        format.xml  { render :xml => @article, :status => :created, :location => @article }
+        format.html { redirect_to @article, notice: 'Article was successfully created.' }
+        format.json { render action: 'show', status: :created, location: @article }
       else
-        format.html { render :action => "new" }
-        format.xml  { render :xml => @article.errors, :status => :unprocessable_entity }
+        format.html { render action: 'new' }
+        format.json { render json: @article.errors, status: :unprocessable_entity }
       end
     end
   end
 
-  # PUT /articles/1
-  # PUT /articles/1.xml
   def update
-    @article = Article.find(params[:id])
-
     respond_to do |format|
-      if @article.update_attributes(article_params)
-        format.html { redirect_to(@article, :notice => 'Article was successfully updated.') }
-        format.xml  { head :ok }
+      if @article.update(article_params)
+        format.html { redirect_to @article, notice: 'Article was successfully updated.' }
+        format.json { head :no_content }
       else
-        format.html { render :action => "edit" }
-        format.xml  { render :xml => @article.errors, :status => :unprocessable_entity }
+        format.html { render action: 'edit' }
+        format.json { render json: @article.errors, status: :unprocessable_entity }
       end
     end
   end
 
-  # DELETE /articles/1
-  # DELETE /articles/1.xml
   def destroy
     @article.destroy
-
     respond_to do |format|
-      format.html { redirect_to(articles_url) }
-      format.xml  { head :ok }
-    end
-  end
-
-  def load_object
-    if params[:id]
-      @article = Article.find(params[:id])
-    else
-      @article = Article.new
+      format.html { redirect_to articles_url }
+      format.json { head :no_content }
     end
   end
 
   private
+
+  def set_article
+    @article = Article.find(params[:id])
+  end
 
   def article_params
     params.require(:article).permit(:title, :body, :tag_list)

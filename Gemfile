@@ -54,7 +54,6 @@ gem "exception_notification"
 
 gem 'acts-as-taggable-on'
 gem 'rails_autolink'
-gem 'jquery-turbolinks'
 
 group :development, :test do
   gem 'rspec-rails'
