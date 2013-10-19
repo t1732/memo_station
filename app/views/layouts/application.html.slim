@@ -6,26 +6,31 @@ html{lang="ja"}
     = csrf_meta_tag
     = stylesheet_link_tag :application
     = content_tag(:title, html_title)
+    meta{name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=no"}
   body
-    .navbar.navbar-inverse.navbar-fixed-top
-      .navbar-inner
-        .container-fluid
-          = link_to((content_tag(:span, "", class: "icon-bar") * 3).html_safe, "#", class: "btn btn-navbar", :data => {:toggle => "collapse", :target => ".nav-collapse"})
-          = link_to(AppConfig[:app_name], :root, class: "brand")
-          ul.nav
+    nav.navbar.navbar-default.navbar-fixed-top.navbar-inverse role="navigation"
+      .container
+        .navbar-header
+          button.navbar-toggle data-target=".navbar-ex1-collapse" data-toggle="collapse" type="button"
+            span.sr-only Toggle navigation
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          = link_to(AppConfig[:app_name], :root, class: "navbar-brand")
+        .collapse.navbar-collapse.navbar-ex1-collapse
+          ul.nav.navbar-nav
             li
-              = link_to(bootstrap_icon(:edit), [:new, :article])
-          = form_tag(:articles, :method => :get, class: "navbar-search pull-right") do
-            = search_field_tag :query, params[:query], class: "search-query", placeholder: "検索"
-    .container-fluid
-      .row-fluid
-        .span12
-          - if notice
-            p#notice
-              = notice
-          = yield
+              = link_to("NEW", [:new, :article])
+          form.navbar-form.navbar-left role="search"
+            .form-group
+              = search_field_tag :query, params[:query], class: "form-control", placeholder: "検索"
+    .container
+      - if notice
+        p#notice
+          = notice
+      = yield
     footer.footer
-      .container-fluid
+      .container
         p
           = "Powered by Rails #{Rails.version} and Ruby #{RUBY_VERSION}"
     = javascript_include_tag(:application)

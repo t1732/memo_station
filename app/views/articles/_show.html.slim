@@ -5,5 +5,7 @@ p
   = article_tag_list article.tag_list
   p.muted
     = article.created_at.strftime("%Y-%m-%d %H:%M")
-    = link_to bootstrap_icon(:edit), [:edit, article]
-    = link_to bootstrap_icon(:trash), article, :data => {:confirm => "本当に？"}, :method => :delete
+    = " "
+    = link_to "編集", [:edit, article], :class => "glyphicon glyphicon-edit"
+    = " "
+    = link_to "削除", article, :data => {:confirm => "本当に？"}, :method => :delete, :class => "glyphicon glyphicon-trash"

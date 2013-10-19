@@ -3,7 +3,7 @@ ruby '2.0.0'
 gem 'rbenv-rehash'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.0.0'
+gem 'rails', '4.0.1.rc1'
 
 # Use sqlite3 as the database for Active Record
 gem 'mysql2'
@@ -40,17 +40,15 @@ end
 # Use unicorn as the app server
 gem 'unicorn'
 
-# Use Capistrano for deployment
-gem 'capistrano', group: :development
-
 # Use debugger
 # gem 'debugger', group: [:development, :test]
 
-gem 'font-awesome-sass-rails'
 gem 'bootstrap-sass-rails'
+gem 'compass-rails', github: 'Compass/compass-rails', branch: 'rails4-hack'
 gem 'slim'
 gem 'kaminari'
 gem "exception_notification"
+gem 'simple_form', github: 'plataformatec/simple_form', tag: 'v3.0.0.rc'
 
 gem 'acts-as-taggable-on'
 gem 'rails_autolink'
@@ -61,4 +59,9 @@ group :development, :test do
   gem 'database_cleaner'
   gem 'timecop'
   gem 'tapp'
+
+  gem 'capistrano'
+  gem 'capistrano-rails'
+  gem 'capistrano-rbenv', github: "capistrano/rbenv"
+  gem 'capistrano-bundler'
 end
