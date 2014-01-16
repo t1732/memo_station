@@ -37,5 +37,23 @@ namespace :deploy do
   end
 
   after :finishing, "deploy:cleanup"
-
 end
+
+# # デプロイ時にDBを初期化するか？
+# if false
+#   desc "rake db:reset の実行"
+#   task :db_reset, :roles => :db do
+#     p 1
+#     # run "cd #{current_release} && bundle exec rake db:reset --trace"
+#   end
+#   after "deploy:update", "db_reset"
+# end
+# 
+# # デプロイ時の rake migrate のあとで rake db:seed を実行するか？
+# if false
+#   desc "rake db:seed"
+#   task :db_seed, :roles => :db, :only => { :primary => true } do
+#     # run "cd #{current_release} && bundle exec rake db:seed --trace"
+#   end
+#   after "deploy:migrate", "db_seed"
+# end

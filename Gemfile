@@ -1,9 +1,9 @@
 source 'https://rubygems.org'
-ruby '2.0.0'
+ruby '2.1.0'
 gem 'rbenv-rehash'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.0.1'
+gem 'rails', '4.0.2'
 
 # Use sqlite3 as the database for Active Record
 gem 'mysql2'
@@ -44,11 +44,11 @@ gem 'unicorn'
 # gem 'debugger', group: [:development, :test]
 
 gem 'bootstrap-sass-rails'
-gem 'compass-rails', github: 'Compass/compass-rails', branch: 'rails4-hack'
+gem 'compass-rails'
 gem 'slim'
 gem 'kaminari'
 gem "exception_notification"
-gem 'simple_form', github: 'plataformatec/simple_form', tag: 'v3.0.0.rc'
+gem 'simple_form', github: 'plataformatec/simple_form', tag: 'v3.0.1'
 
 gem 'acts-as-taggable-on'
 gem 'rails_autolink'
