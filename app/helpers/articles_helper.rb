@@ -13,7 +13,6 @@ module ArticlesHelper
   end
 
   def article_tag_list(tag_list)
-    # tag_list.collect{|e|link_to(e, polymorphic_path([:articles], :query => e), :class => "label notice")}.join(" ").html_safe
     tag_list.collect{|e|link_to(e, polymorphic_path([:articles], :query => e))}.join(" ").html_safe
   end
 end

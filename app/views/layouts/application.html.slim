@@ -8,29 +8,13 @@ html{lang="ja"}
     = content_tag(:title, html_title)
     meta{name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=no"}
   body
-    nav.navbar.navbar-default.navbar-fixed-top.navbar-inverse role="navigation"
-      .container
-        .navbar-header
-          button.navbar-toggle data-target=".navbar-ex1-collapse" data-toggle="collapse" type="button"
-            span.sr-only Toggle navigation
-            span.icon-bar
-            span.icon-bar
-            span.icon-bar
-          = link_to(AppConfig[:app_name], :root, class: "navbar-brand")
-        .collapse.navbar-collapse.navbar-ex1-collapse
-          ul.nav.navbar-nav
-            li
-              = link_to("NEW", [:new, :article])
-          form.navbar-form.navbar-left role="search"
-            .form-group
-              = search_field_tag :query, params[:query], class: "form-control", placeholder: "検索"
-    .container
-      - if notice
-        p#notice
-          = notice
-      = yield
-    footer.footer
-      .container
-        p
-          = "Powered by Rails #{Rails.version} and Ruby #{RUBY_VERSION}"
+    h1= link_to(AppConfig[:app_name], :root)
+    p= link_to("NEW", [:new, :article])
+    p= search_field_tag :query, params[:query], placeholder: "検索"
+    - if notice
+      div= notice
+    hr
+    = yield
+    footer
+      = "Powered by Rails #{Rails.version} and Ruby #{RUBY_VERSION}"
     = javascript_include_tag(:application)

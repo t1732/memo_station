@@ -1,6 +1,15 @@
-= simple_form_for(@article, :defaults => {:input_html => {:class => "form-control"}}) do |form|
-  = form.error_notification
-  = form.input :title
-  = form.input :tag_list
-  = form.input :body
-  = form.button(:submit)
+- if @article.errors.full_messages
+  = simple_format @article.errors.full_messages.join("\n")
+
+= form_for(@article) do |form|
+  p
+    div= form.label :title
+    div= form.text_field :title
+  p
+    div= form.label :tag_list
+    div= form.text_field :tag_list
+  p
+    div= form.label :body
+    div= form.text_area :body
+  p
+    = form.submit

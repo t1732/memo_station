@@ -1,11 +1,12 @@
-h4
-  = link_to article.title, article
-= article_body article.body
-p
-  = article_tag_list article.tag_list
-  p.muted
+section
+  h2
+    = link_to article.title, article
+  = article_body article.body
+  p
+    = article_tag_list article.tag_list
+  p
     = article.created_at.strftime("%Y-%m-%d %H:%M")
     = " "
-    = link_to "編集", [:edit, article], :class => "glyphicon glyphicon-edit"
+    = link_to "編集", [:edit, article]
     = " "
-    = link_to "削除", article, :data => {:confirm => "本当に？"}, :method => :delete, :class => "glyphicon glyphicon-trash"
+    = link_to "削除", article, :data => {:confirm => "本当に？"}, :method => :delete

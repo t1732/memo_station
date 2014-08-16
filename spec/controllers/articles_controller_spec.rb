@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-require "spec_helper"
+require 'rails_helper'
 
-describe ArticlesController do
+RSpec.describe ArticlesController, :type => :controller do
   before do
     @article = FactoryGirl.create(:article, :tag_list => "t1")
   end

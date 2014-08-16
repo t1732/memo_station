@@ -1,4 +1,4 @@
-MemoStation::Application.routes.draw do
+Rails.application.routes.draw do
   resources :articles do
     post :text_post, :on => :collection
   end
