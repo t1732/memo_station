@@ -35,8 +35,8 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.1)
       tzinfo (~> 1.1)
-    acts-as-taggable-on (3.0.1)
-      rails (>= 3, < 5)
+    acts-as-taggable-on (3.3.0)
+      activerecord (>= 3, < 5)
     arel (5.0.1.20140414130214)
     builder (3.2.2)
     capistrano (3.2.1)
@@ -171,7 +171,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  acts-as-taggable-on (= 3.0.1)
+  acts-as-taggable-on
   capistrano
   capistrano-bundler
   capistrano-rails

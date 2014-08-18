@@ -41,7 +41,7 @@ gem 'spring',        group: :development
 
 gem 'mysql2'
 gem 'slim'
-gem 'acts-as-taggable-on', "3.0.1"
+gem 'acts-as-taggable-on'
 gem 'rails_autolink'
 
 group :development, :test do
