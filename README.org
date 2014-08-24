@@ -1,7 +1,7 @@
 #+OPTIONS: toc:nil num:nil author:nil creator:nil \n:nil |:t
 #+OPTIONS: @:t ::t ^:t -:t f:t *:t <:t
 
-* 汎用メモ管理アプリ
+* Emacs連動メモ管理アプリ
 
   - [[https://travis-ci.org/akicho8/memo_station][Travis]]: [[https://travis-ci.org/akicho8/memo_station.png]]
   - [[https://gemnasium.com/akicho8/memo_station/][Gemnasium]]: [[https://gemnasium.com/akicho8/memo_station.png]]
@@ -10,13 +10,12 @@
 ** セットアップ
 
    : bundle install
-   : rake db:reset
+   : rake db:migrate
    : rails s
    : open http://localhost:3000/
 
 ** デプロイ
 
-   : cap deploy:setup
    : cap deploy:migrations
 
 ** Emacsインタフェースの準備
@@ -36,7 +35,7 @@
 
    : brew install nkf
 
-** やることや不具合
+** やること
 
 - nkf依存してるのをやめたい
 - tdiary.el のライブラリに依存しているのをやめたい
