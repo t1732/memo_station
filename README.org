@@ -9,14 +9,14 @@
 
 ** セットアップ
 
-   : bundle install
+   : bundle
    : rake db:migrate
    : rails s
    : open http://localhost:3000/
 
 ** デプロイ
 
-   : cap deploy:migrations
+   : cap production deploy
 
 ** Emacsインタフェースの準備
 

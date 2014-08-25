@@ -46,12 +46,8 @@ gem 'acts-as-taggable-on'
 gem 'rails_autolink'
 
 group :development, :test do
-  gem 'rspec-rails'
-  gem 'factory_girl_rails'
-  gem 'database_cleaner'
-  gem 'timecop'
-
   gem 'capistrano'
   gem 'capistrano-rails'
   gem 'capistrano-bundler'
+  gem 'test-unit-rails'
 end
