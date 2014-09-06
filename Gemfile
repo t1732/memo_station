@@ -40,7 +40,8 @@ gem 'spring',        group: :development
 
 # --------------------------------------------------------------------------------
 
-gem 'mysql2'
+# gem 'mysql2'
+gem 'sqlite3'
 gem 'slim'
 gem 'acts-as-taggable-on'
 gem 'rails_autolink'
