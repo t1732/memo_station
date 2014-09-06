@@ -9,8 +9,10 @@ html{lang="ja"}
     meta{name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=no"}
   body
     h1= link_to(AppConfig[:app_name], :root)
-    p= link_to("NEW", [:new, :article])
-    p= search_field_tag :query, params[:query], placeholder: "検索"
+    p= link_to("登録", [:new, :article])
+    = form_tag(:articles, :method => :get) do
+      = search_field_tag :query, params[:query]
+      = submit_tag("検索", :name => nil)
     - if notice
       div= notice
     hr
