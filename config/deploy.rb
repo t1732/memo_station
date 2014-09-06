@@ -1,59 +1,62 @@
-# -*- coding: utf-8 -*-
+# config valid only for Capistrano 3.1
+lock '3.2.1'
+
 set :application, "memo_station"
 set :repo_url, "file://#{Pathname(__FILE__).dirname.dirname.expand_path}"
 
-# ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }
+# Default branch is :master
+# ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call
 
-# set :deploy_to, "/var/www/#{fetch(:application)}_production"
-set :scm, :git
+# Default deploy_to directory is /var/www/my_app
+# set :deploy_to, '/var/www/my_app'
+set :deploy_to, proc { "/var/www/#{fetch(:application)}_#{fetch(:stage)}" }
 
+# Default value for :scm is :git
+# set :scm, :git
+
+# Default value for :format is :pretty
 # set :format, :pretty
+
+# Default value for :log_level is :debug
 # set :log_level, :debug
+
+# Default value for :pty is false
 # set :pty, true
 
+# Default value for :linked_files is []
 # set :linked_files, %w{config/database.yml}
-# set :linked_dirs, %w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}
 
+# Default value for linked_dirs is []
+set :linked_dirs, %w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}
+
+# Default value for default_env is {}
 # set :default_env, { path: "/opt/ruby/bin:$PATH" }
+
+# Default value for keep_releases is 5
 # set :keep_releases, 5
 
 namespace :deploy do
-
-  desc "Restart application"
+  desc 'Restart application'
   task :restart do
     on roles(:app), in: :sequence, wait: 5 do
-      execute :mkdir, "-p", release_path.join("tmp") # <= これを追加する
-      execute :touch, release_path.join("tmp/restart.txt")
+      execute :touch, release_path.join('tmp/restart.txt')
     end
   end
+
+  after :publishing, :restart
 
   after :restart, :clear_cache do
     on roles(:web), in: :groups, limit: 3, wait: 10 do
       # Here we can do anything such as:
       # within release_path do
-      #   execute :rake, "cache:clear"
+      #   execute :rake, 'cache:clear'
       # end
     end
   end
 
-  after :finishing, "deploy:cleanup"
+  after "deploy:assets:precompile", :chmod_R do
+    on roles(:web), in: :groups, limit: 3, wait: 10 do
+      execute :chmod, "-R ug+w #{fetch(:deploy_to)}"
+    end
+  end
 end
-
-# # デプロイ時にDBを初期化するか？
-# if false
-#   desc "rake db:reset の実行"
-#   task :db_reset, :roles => :db do
-#     p 1
-#     # run "cd #{current_release} && bundle exec rake db:reset --trace"
-#   end
-#   after "deploy:update", "db_reset"
-# end
-# 
-# # デプロイ時の rake migrate のあとで rake db:seed を実行するか？
-# if false
-#   desc "rake db:seed"
-#   task :db_seed, :roles => :db, :only => { :primary => true } do
-#     # run "cd #{current_release} && bundle exec rake db:seed --trace"
-#   end
-#   after "deploy:migrate", "db_seed"
-# end
