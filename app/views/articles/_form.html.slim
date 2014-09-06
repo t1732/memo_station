@@ -1,4 +1,4 @@
-- if @article.errors.full_messages
+- if @article.errors.present?
   = simple_format @article.errors.full_messages.join("\n")
 
 = form_for(@article) do |form|
