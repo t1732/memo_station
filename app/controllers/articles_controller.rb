@@ -13,7 +13,7 @@ class ArticlesController < ApplicationController
     respond_to do |format|
       format.html
       format.xml { render :xml => @articles }
-      format.txt { render_text_for_emacs(Article.collection_to_txt(@articles)) }
+      format.txt { render_text_for_emacs(Article.separated_text_format(@articles)) }
     end
   end
 

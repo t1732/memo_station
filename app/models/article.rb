@@ -7,7 +7,7 @@ class Article < ActiveRecord::Base
 
   before_validation do
     if changes.has_key?(:title)
-      self.title = title.to_s.squish.presence
+      self.title = self.class.string_normalize(title)
     end
     if changes.has_key?(:body)
       self.body = body.to_s.strip.presence
@@ -26,12 +26,14 @@ class Article < ActiveRecord::Base
 
   def to_h
     attributes.merge({
-        "title"      => title.to_s.gsub(/\u3000/, " ").squish,
+        "title"      => self.class.string_normalize(title),
         "tag_list"   => normalized_tag_list,
         "created_at" => created_at,
         "updated_at" => updated_at,
       })
   end
+
+  private
 
   # acts_as_taggable の不具合で Foo と foo が混在する場合があるため
   def normalized_tag_list
@@ -46,30 +48,32 @@ class Article < ActiveRecord::Base
     end
 
     module ClassMethods
-      # Emacsからポストできる正しいテキストかを確認する
-      def text_resolve?(str)
-        str.include?("Title:") && str.include?("Tag:")
-      end
-
-      # ポストされたテキストから使えるものだけを抽出する
-      def text_post_cleanup(strs)
-        strs.split(/^-{80,}$/).find_all{|article|text_resolve?(article)}
-      end
-
-      # ポストしたテキストをまとめて処理する
-      def text_post(strs)
+      def text_post(str)
         out = ""
-        articles = text_post_cleanup(strs)
-        out << "個数: #{articles.size}\n"
-        out << "#{articles.inspect}\n" if $DEBUG
-        logger.debug(articles)
-        articles.each{|article|
-          out << text_post_one(article)
-        }
+        elems = text_to_array(str)
+        out << "個数: #{elems.size}\n"
+        out << "#{elems.inspect}\n" if $DEBUG
+        logger.debug(elems)
+        elems.each do |elem|
+          out << text_post_one(elem)
+        end
         out
       end
 
-      # 一つの記事だけを処理する
+      def string_normalize(str)
+        str.to_s.gsub(/\u3000/, " ").squish
+      end
+
+      def separated_text_format(all)
+        [
+          separator,
+          all.collect(&:to_text).join(separator),
+          separator,
+        ].join
+      end
+
+      private
+
       def text_post_one(str)
         attrs = text_parse(str)
 
@@ -84,7 +88,7 @@ class Article < ActiveRecord::Base
         article.attributes = attrs.slice(:title, :body, :tag_list)
 
         save_p = article.new_record?
-        save_p ||= !article.content_equal?(pre_article)
+        save_p ||= !article.same_content?(pre_article)
         save_p ||= old_tag_list.sort != article.tag_list.sort
 
         errors = ""
@@ -107,15 +111,13 @@ class Article < ActiveRecord::Base
         "#{mark + delmark} [#{article.id}] #{article.title} #{errors}".rstrip + "\n"
       end
 
-      def collection_to_txt(records)
-        [
-          separator,
-          records.collect(&:to_text).join(separator),
-          separator,
-        ].join
+      def text_resolve?(str)
+        str.include?("Title:") && str.include?("Tag:")
       end
 
-      private
+      def text_to_array(text)
+        text.split(/^-{80,}$/).find_all {|article| text_resolve?(article) }
+      end
 
       def separator
         @separator ||= "-" * 80 + "\n"
@@ -128,10 +130,10 @@ class Article < ActiveRecord::Base
             attrs[:id] = md.captures.first.to_i
           end
           if md = str.match(/^Title:(.+)$/i)
-            attrs[:title] = md.captures.first.strip
+            attrs[:title] = string_normalize(md.captures.first)
           end
           if md = str.match(/^Tag:(.+)$/i)
-            attrs[:tag_list] = md.captures.first.strip
+            attrs[:tag_list] = string_normalize(md.captures.first)
           end
           if md = str.match(/^#{text_separator}\n(.*)\z/mi)
             attrs[:body] = md.captures.first
@@ -140,12 +142,8 @@ class Article < ActiveRecord::Base
       end
     end
 
-    # other の tag_names は常に空。比較はできないので注意。
-    def content_equal?(other)
-      [
-        title.to_s.strip == other.title.to_s.strip,
-        body.to_s.strip == other.body.to_s.strip,
-      ].all?
+    def same_content?(other)
+      title == other.title && body == other.body
     end
 
     def to_text
@@ -166,13 +164,15 @@ class Article < ActiveRecord::Base
 
     module ClassMethods
       # production -> staging
-      # rails runner -e production 'Article.data_export'
-      # cp db/production_marshal.bin db/staging_marshal.bin
-      # rails runner -e staging 'Article.data_import'
+      #
+      #   rails runner -e production 'Article.data_export'
+      #   cp db/production_marshal.bin db/staging_marshal.bin
+      #   rails runner -e staging 'Article.data_import'
       #
       # production -> production
-      # rails runner -e production 'Article.data_export'
-      # rails runner -e production 'Article.data_import'
+      #
+      #   rails runner -e production 'Article.data_export'
+      #   rails runner -e production 'Article.data_import'
       def data_export
         rows = all.order(:id).collect(&:to_h)
         bin = Marshal.dump(rows)
@@ -186,6 +186,8 @@ class Article < ActiveRecord::Base
       end
 
       def data_import
+        raise if Rails.env.production?
+
         destroy_all
         rows = Marshal.load(marshal_file.read)
 
@@ -202,7 +204,7 @@ class Article < ActiveRecord::Base
           end
         end
 
-        rows.each{|row|
+        rows.each do |row|
           article = find(row["id"])
           if article.to_h == row
           else
@@ -210,9 +212,11 @@ class Article < ActiveRecord::Base
             p article.to_h
             raise
           end
-        }
+        end
         p "OK"
       end
+
+      private
 
       def marshal_file
         Rails.root.join("db/#{Rails.env}_marshal.bin")
