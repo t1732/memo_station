@@ -40,7 +40,6 @@ gem 'spring',        group: :development
 
 # --------------------------------------------------------------------------------
 
-# gem 'mysql2'
 gem 'sqlite3'
 gem 'slim'
 gem 'acts-as-taggable-on'
@@ -54,6 +53,5 @@ group :development, :test do
 
   gem 'capistrano'
   gem 'capistrano-rails'
-  gem 'capistrano-rbenv', github: "capistrano/rbenv"
   gem 'capistrano-bundler'
 end
