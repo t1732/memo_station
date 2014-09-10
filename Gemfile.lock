@@ -143,7 +143,7 @@ GEM
       test-unit (>= 2.5.3)
     test-unit-notify (1.0.3)
       test-unit (>= 2.4.9)
-    test-unit-rails (1.0.3)
+    test-unit-rails (1.0.4)
       rails
       test-unit-activesupport (>= 1.0.2)
       test-unit-capybara
