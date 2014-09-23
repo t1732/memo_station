@@ -9,6 +9,7 @@ class ArticlesController < ApplicationController
     else
       @articles = Article.limit(params[:limit] || 100)
     end
+    @articles = @articles.order(:updated_at => :desc)
 
     respond_to do |format|
       format.html
