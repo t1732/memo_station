@@ -3,5 +3,5 @@ Rails.application.routes.draw do
     post :text_post, :on => :collection
   end
 
-  root :to => "articles#index"
+  root "articles#index"
 end
