@@ -33,7 +33,7 @@ server 'localhost', user: 'deploy', roles: %w{web app}, my_property: :my_value
 #
 # And/or per server (overrides global)
 # ------------------------------------
-# server 'localhost',
+# server 'example.com',
 #   user: 'user_name',
 #   roles: %w{web app},
 #   ssh_options: {

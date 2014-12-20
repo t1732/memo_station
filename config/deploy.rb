@@ -1,5 +1,5 @@
-# config valid only for Capistrano 3.1
-lock '3.2.1'
+# config valid only for current version of Capistrano
+lock '3.3.4'
 
 set :application, "memo_station"
 set :repo_url, "file://#{Pathname(__FILE__).dirname.dirname.expand_path}"
@@ -7,8 +7,7 @@ set :repo_url, "file://#{Pathname(__FILE__).dirname.dirname.expand_path}"
 # Default branch is :master
 # ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call
 
-# Default deploy_to directory is /var/www/my_app
-# set :deploy_to, '/var/www/my_app'
+# Default deploy_to directory is /var/www/my_app_name
 set :deploy_to, proc { "/var/www/#{fetch(:application)}_#{fetch(:stage)}" }
 
 # Default value for :scm is :git
@@ -24,10 +23,10 @@ set :deploy_to, proc { "/var/www/#{fetch(:application)}_#{fetch(:stage)}" }
 # set :pty, true
 
 # Default value for :linked_files is []
-# set :linked_files, %w{config/database.yml}
+# set :linked_files, fetch(:linked_files, []).push('config/database.yml')
 
 # Default value for linked_dirs is []
-set :linked_dirs, %w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}
+set :linked_dirs, fetch(:linked_dirs, []).push('bin', 'log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'vendor/bundle', 'public/system')
 
 # Default value for default_env is {}
 # set :default_env, { path: "/opt/ruby/bin:$PATH" }

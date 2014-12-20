@@ -8,7 +8,6 @@ role :app, %w{deploy@localhost}
 role :web, %w{deploy@localhost}
 role :db,  %w{deploy@localhost}
 
-
 # Extended Server Syntax
 # ======================
 # This can be used to drop a more detailed server definition into the
@@ -33,7 +32,7 @@ server 'localhost', user: 'deploy', roles: %w{web app}, my_property: :my_value
 #
 # And/or per server (overrides global)
 # ------------------------------------
-# server 'localhost',
+# server 'example.com',
 #   user: 'user_name',
 #   roles: %w{web app},
 #   ssh_options: {
