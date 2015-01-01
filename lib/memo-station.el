@@ -1,6 +1,6 @@
 ;;; memo-station.el --- メモを集中管理する
 
-;; Copyright (C) 2002,2006,2011,2012 Free Software Foundation, Inc.
+;; Copyright (C) 2002,2006,2011,2012,2015 Free Software Foundation, Inc.
 
 ;; Author: Akira Ikeda <pinpon.ikeda@gmail.com>
 ;; Keywords: program text
@@ -352,6 +352,7 @@
   (use-local-map memo-station-mode-map)
   ;; (memo-station-color)
   (setq buffer-read-only t)
+  (set (make-local-variable 'truncate-lines) t)
   (run-hooks 'memo-station-mode-hook))
 
 (defun memo-station-edit-save-buffer ()
@@ -377,6 +378,7 @@
   (setq mode-name "メモステ編集モード")
   (use-local-map memo-station-edit-mode-map)
   (setq buffer-read-only nil)
+  (set (make-local-variable 'truncate-lines) t)
   (run-hooks 'memo-station-edit-mode-hook))
 
 (defun memo-station-get-select-str ()
@@ -393,24 +395,17 @@
         (select-str (memo-station-get-select-str)))
     ;;     (when (get-buffer buffname)
     ;;       (kill-buffer buffname))
-
     (if (get-buffer buffname)
         (switch-to-buffer buffname)
       (switch-to-buffer buffname)
       (insert "Title: \n"
               "Tag: \n"
               "--text follows this line--\n"
-              (or select-str "")
-              )
+              (or select-str ""))
       (when t
-        ;; 「Title:」の直後にカーソル移動
-        (beginning-of-buffer)
-        (move-end-of-line 1)
-        )
-      (memo-station-edit-mode)
-      )
-    )
-  )
+        (beginning-of-buffer)       ; 「Title:」の直後にカーソル移動
+        (move-end-of-line 1))
+      (memo-station-edit-mode))))
 
 (defun memo-station-search (&optional tag)
   (interactive)
