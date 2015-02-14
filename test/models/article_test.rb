@@ -19,7 +19,7 @@ class ArticleTest < ActiveSupport::TestCase
     end
   end
 
-  sub_test_case "作成できるない" do
+  sub_test_case "作成できない" do
     test "タイトル未入力なので作成できない" do
       assert_raise do
         Article.create!(:title => "", :body => hex, :tag_list => hex)
@@ -35,6 +35,11 @@ class ArticleTest < ActiveSupport::TestCase
 
   test "削除できる" do
     assert article_create.destroy
+  end
+
+  test "タグ名の大文字小文字は区別せずuniqにする" do
+    r = Article.create!(:title => hex, :body => hex, :tag_list => "foo FOO Foo")
+    assert_equal ["foo"], Article.find(r.id).tag_list
   end
 
   sub_test_case "テキスト" do

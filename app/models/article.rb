@@ -5,6 +5,11 @@ class Article < ActiveRecord::Base
 
   default_scope { order(arel_table[:updated_at].desc) }
 
+  before_validation :on => :create do
+    self.tag_list = normalized_tag_list
+    true
+  end
+
   before_validation do
     if changes.has_key?(:title)
       self.title = self.class.string_normalize(title)
