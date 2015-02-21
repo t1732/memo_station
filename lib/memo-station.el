@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2002,2006,2011,2012,2015 Free Software Foundation, Inc.
 
-;; Author: Akira Ikeda <pinpon.ikeda@gmail.com>
+;; Author: akicho8 <akicho8@gmail.com>
 ;; Keywords: program text
 
 ;; This file is free software; you can redistribute it and/or modify
@@ -21,8 +21,6 @@
 ;; Boston, MA 02111-1307, USA.
 
 ;;; Commentary:
-
-;; $Id: memo-station.el 558 2006-03-15 16:57:03Z ikeda $
 
 ;; 設定方法
 ;;
