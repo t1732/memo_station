@@ -14,7 +14,7 @@ test:
 staging:
   <<: *defaults
   database: /var/www/memo_station_staging/shared/db/staging.sqlite3
-  
+
 production:
   <<: *defaults
   database: /var/www/memo_station_production/shared/db/production.sqlite3
