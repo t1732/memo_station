@@ -1,3 +1,3 @@
 if Rails.env.development?
-  Slim::Engine.default_options(:pretty => true)
+  Slim::Engine.set_options(pretty: true, sort_attrs: false)
 end
