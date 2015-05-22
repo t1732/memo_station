@@ -41,17 +41,15 @@ group :development, :test do
 
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
-end
+  gem 'spring-commands-rspec'
 
-# --------------------------------------------------------------------------------
+  gem 'capistrano'
+  gem 'capistrano-rails'
+  gem 'capistrano-bundler'
+  gem 'rspec-rails'
+  gem 'test-unit'
+end
 
 gem 'slim'
 gem 'acts-as-taggable-on'
 gem 'rails_autolink'
-
-group :development, :test do
-  gem 'capistrano'
-  gem 'capistrano-rails'
-  gem 'capistrano-bundler'
-  gem 'test-unit-rails'
-end

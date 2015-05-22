@@ -1,54 +1,56 @@
 # -*- coding: utf-8 -*-
-require 'test_helper'
+require 'rails_helper'
 
-class ArticlesControllerTest < ActionController::TestCase
-  setup do
+RSpec.describe ArticlesController, type: :controller do
+  before do
     Article.destroy_all
     @article = article_create
   end
 
-  test "index" do
-    get :index
-    assert_response :success
+  context "index" do
+    it "index" do
+      get :index
+      assert_response :success
+    end
+
+    it "検索" do
+      get :index, :query => @article.tag_list, :format => "txt"
+      assert_response :success
+      assert_match /#{@article.id}.*#{@article.title}.*#{@article.tag_list}.*#{@article.body}/m, response.body
+    end
   end
 
-  test "show" do
+  it "show" do
     get :show, :id => @article.id
     assert_response :success
   end
 
-  test "new" do
+  it "new" do
     get :new
     assert_response :success
   end
 
-  test "create" do
+  it "create" do
     post :create, :article => {:title => hex, :tag_list => hex, :body => hex}
     assert_response :redirect
   end
 
-  test "edit" do
+  it "edit" do
     get :edit, :id => @article.id
     assert_response :success
   end
 
-  test "update" do
+  it "update" do
     put :update, :id => @article.id, :article => {:title => hex, :tag_list => hex, :body => hex}
     assert_response :redirect
   end
 
-  test "destroy" do
+  it "destroy" do
     delete :destroy, :id => @article.id
     assert_response :redirect
   end
 
-  test "検索" do
-    get :index, :query => @article.tag_list, :format => "txt"
-    assert_response :success
-    assert_match /#{@article.id}.*#{@article.title}.*#{@article.tag_list}.*#{@article.body}/m, response.body
-  end
-
-  test "test_post" do
+  it "test_post" do
     post :text_post, :content => "
 Title: #{hex}
 Tag: #{hex}
