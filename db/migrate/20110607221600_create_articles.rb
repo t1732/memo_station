@@ -3,7 +3,7 @@ class CreateArticles < ActiveRecord::Migration
     create_table :articles do |t|
       t.string :title, :index => {:unique => true}
       t.text :body
-      t.timestamps
+      t.timestamps :null => false
     end
   end
 end
