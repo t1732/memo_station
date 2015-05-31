@@ -50,6 +50,6 @@ group :development, :test do
   gem 'test-unit'
 end
 
-gem 'slim'
+gem 'slim-rails'
 gem 'acts-as-taggable-on'
 gem 'rails_autolink'
