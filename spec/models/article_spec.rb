@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 require 'rails_helper'
 
 RSpec.describe Article, type: :model do
@@ -23,13 +22,13 @@ RSpec.describe Article, type: :model do
     it "タイトル未入力なので作成できない" do
       expect {
         Article.create!(:title => "", :body => hex, :tag_list => hex)
-      }.to raise_error
+      }.to raise_error(ActiveRecord::RecordInvalid)
     end
 
     it "タグ未設定なので作成できない" do
       expect {
         Article.create!(:title => hex, :body => hex, :tag_list => "")
-      }.to raise_error
+      }.to raise_error(ActiveRecord::RecordInvalid)
     end
   end
 
