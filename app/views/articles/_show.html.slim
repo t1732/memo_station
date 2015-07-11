@@ -1,12 +1,10 @@
 section
   h2
-    = link_to article.title, article
-  = article_body article.body
+    = link_to(article.title, article)
+  = article_body(article.body)
   p
-    = article_tag_list article.tag_list
+    = article_tag_list(article.tag_list)
   p
     = article.created_at.strftime("%Y-%m-%d %H:%M")
-    = " "
-    = link_to "編集", [:edit, article]
-    = " "
-    = link_to "削除", article, :data => {:confirm => "本当に？"}, :method => :delete
+    =<> link_to "編集", [:edit, article]
+    =<> link_to "削除", article, :data => {:confirm => "本当に？"}, :method => :delete

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 class Article < ActiveRecord::Base
   acts_as_taggable
 
@@ -12,7 +10,7 @@ class Article < ActiveRecord::Base
 
   before_validation do
     if changes.has_key?(:title)
-      self.title = self.class.string_normalize(title)
+      self.title = string_normalize(title)
     end
     if changes.has_key?(:body)
       self.body = body.to_s.strip.presence
@@ -31,7 +29,7 @@ class Article < ActiveRecord::Base
 
   def to_h
     attributes.merge({
-        "title"      => self.class.string_normalize(title),
+        "title"      => string_normalize(title),
         "tag_list"   => normalized_tag_list,
         "created_at" => created_at,
         "updated_at" => updated_at,
@@ -45,14 +43,13 @@ class Article < ActiveRecord::Base
     ActsAsTaggableOn::TagListParser.parse(tag_list.uniq(&:downcase).sort)
   end
 
-  module EmacsSupport
-    extend ActiveSupport::Concern
-
+  concerning :EmacsSupport do
     included do
       cattr_accessor(:text_separator) { "--text follows this line--" }
+      delegate :string_normalize, :to => "self.class"
     end
 
-    module ClassMethods
+    class_methods do
       def text_post(str)
         out = ""
         elems = text_to_array(str)
@@ -66,7 +63,7 @@ class Article < ActiveRecord::Base
       end
 
       def string_normalize(str)
-        str.to_s.gsub(/\u3000/, " ").squish
+        str.to_s.gsub(/[[:space:]]/, " ").squish
       end
 
       def separated_text_format(all)
@@ -84,11 +81,11 @@ class Article < ActiveRecord::Base
 
         old_tag_list = ""
         if attrs[:id]
-          article = Article.find(attrs[:id])
+          article = find(attrs[:id])
           pre_article = article.dup # cloneはだめ
           old_tag_list = article.tag_list
         else
-          article = Article.new
+          article = new
         end
         article.attributes = attrs.slice(:title, :body, :tag_list)
 
@@ -129,19 +126,19 @@ class Article < ActiveRecord::Base
       end
 
       def text_parse(str)
-        {}.tap do |attrs|
+        {}.tap do |e|
           str = str.force_encoding("UTF-8")
           if md = str.match(/^Id:\s*(\d+)$/i)
-            attrs[:id] = md.captures.first.to_i
+            e[:id] = md.captures.first.to_i
           end
           if md = str.match(/^Title:(.+)$/i)
-            attrs[:title] = string_normalize(md.captures.first)
+            e[:title] = string_normalize(md.captures.first)
           end
           if md = str.match(/^Tag:(.+)$/i)
-            attrs[:tag_list] = string_normalize(md.captures.first)
+            e[:tag_list] = string_normalize(md.captures.first)
           end
           if md = str.match(/^#{text_separator}\n(.*)\z/mi)
-            attrs[:body] = md.captures.first
+            e[:body] = md.captures.first
           end
         end
       end
@@ -162,12 +159,9 @@ class Article < ActiveRecord::Base
       str.join("\n") + "\n"
     end
   end
-  include EmacsSupport
 
-  module Task
-    extend ActiveSupport::Concern
-
-    module ClassMethods
+  concerning :Task do
+    class_methods do
       # production -> staging
       #
       #   rails runner -e production 'Article.data_export'
@@ -228,5 +222,4 @@ class Article < ActiveRecord::Base
       end
     end
   end
-  include Task
 end
