@@ -175,7 +175,7 @@ class Article < ActiveRecord::Base
       def data_export
         rows = all.order(:id).collect(&:to_h)
         bin = Marshal.dump(rows)
-        marshal_file.open("wb"){|f|f << bin}
+        marshal_file.open("wb") {|f|f << bin}
         rows2 = Marshal.load(marshal_file.read)
         if rows2 == rows
           p "OK"
