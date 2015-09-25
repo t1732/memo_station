@@ -49,6 +49,8 @@ group :development, :test do
 
   gem 'rspec-rails'
   gem 'test-unit'
+
+  gem 'rubocop'
 end
 
 gem 'slim-rails'
