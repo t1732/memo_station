@@ -39,3 +39,38 @@
 
 - nkf依存してるのをやめたい
 - tdiary.el のライブラリに依存しているのをやめたい
+
+** Docker Setup
+
+   コンテナ作成
+
+   : docker-compose build
+
+   コンテナ起動
+
+   : docker-compose up -d
+
+   VirtualBoxにポートフォワーディング設定を追加
+
+   : VBoxManage controlvm [docker image] natpf1 "nginx,tcp,127.0.0.1,8080,,80"
+
+   migrationを実行
+
+   : docker-compose run rails rake db:migrate
+
+   hostsに以下を追加
+
+   : 127.0.0.1 memo_station.local
+
+   アクセス
+
+   : http://memo_station.local:8080
+
+   sqlite3データファイルをローカルにコピー (ローカルパスをマウントしてコピーしている)
+
+   : docker run --volumes-from memostation_rails_1 -v $(pwd):/backup busybox cp /data/memo_station_production.sqlite3 /backup/
+
+   Volume内sqliteデータのバックアップリストア
+
+   : docker run -i -t --volumes-from memostation_rails_1 -v $(pwd):/backup busybox /bin/sh
+   : # cp /backup/memo_station_production.sqlite3 /data/memo_station_production.sqlite3

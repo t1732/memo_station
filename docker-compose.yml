@@ -1,0 +1,21 @@
+nginx:
+  build: containers/nginx
+  ports:
+    - '8080:80'
+  volumes_from:
+    - datastore
+  links:
+    - rails
+
+datastore:
+  build: containers/datastore
+
+rails:
+  build: .
+  ports:
+    - '3000:3000'
+  environment:
+    RAILS_ENV: production
+    DATABASE_PATH: /data/memo_station_production.sqlite3
+  volumes_from:
+    - datastore

@@ -11,10 +11,6 @@ test:
   <<: *defaults
   database: db/test.sqlite3
 
-staging:
-  <<: *defaults
-  database: /var/www/memo_station_staging/shared/db/staging.sqlite3
-
 production:
   <<: *defaults
-  database: /var/www/memo_station_production/shared/db/production.sqlite3
+  database: <%= ENV['DATABASE_PATH'] %>
