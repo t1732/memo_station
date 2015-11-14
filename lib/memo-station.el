@@ -1,6 +1,6 @@
 ;;; memo-station.el --- メモを集中管理する
 
-;; Copyright (C) 2002,2006,2011,2012,2015 Free Software Foundation, Inc.
+;; Copyright (C) 2002-2015 Free Software Foundation, Inc.
 
 ;; Author: akicho8 <akicho8@gmail.com>
 ;; Keywords: program text
@@ -32,8 +32,6 @@
 ;;; Code:
 
 (require 'request)
-;; (setq request-backend 'curl)
-;; (setq request-backend 'url-retrieve)
 
 (defgroup memo-station nil
   "*メモステモード"
@@ -108,41 +106,6 @@
     (substitute-key-definition 'save-buffer 'memo-station-edit-save-buffer map global-map)
     (setq memo-station-edit-mode-map map)))
 
-(defvar memo-station-overlays nil)
-(defvar memo-station-underline-overlays nil)
-(defface memo-station-separator-face
-  '((((class color)
-      (background dark))
-     (:background "red" :bold t :foreground "blue"))
-    (((class color)
-      (background light))
-     (:bold t :foreground "red"))
-    (t
-     ()))
-  "セパレータ用Face")
-
-(defun memo-station-color ()
-  "*Highlight the file buffer"
-  (interactive)
-  (save-excursion
-    (let (ov)
-      (goto-char (point-min))
-      (while (re-search-forward memo-station-separator-regexp nil t)
-        (setq ov (make-overlay (match-beginning 0) (match-end 0)))
-        (overlay-put ov 'face 'memo-station-separator-face)
-        (overlay-put ov 'priority 0)
-        (setq memo-station-overlays (cons ov memo-station-overlays))
-        (make-local-hook 'after-change-functions)
-        (remove-hook 'after-change-functions 'memo-station-remove-overlays)))))
-
-(defun memo-station-remove-overlays (&optional beg end length)
-  (interactive)
-  (if (and beg end (= beg end))
-      ()
-    (while memo-station-overlays
-      (delete-overlay (car memo-station-overlays))
-      (setq memo-station-overlays (cdr memo-station-overlays)))))
-
 (defun memo-station ()
   "メモステ起動
 リュージョンが有効なら先頭に追加する
@@ -208,7 +171,6 @@
 (defun memo-station-exit ()
   "メモステ終了"
   (interactive)
-  (memo-station-remove-overlays)
   (kill-buffer nil)
   (set-window-configuration memo-station-save-window)
   (run-hooks 'memo-station-exit-hook))
@@ -263,8 +225,7 @@
     (setq end (point))
     (setq memo-station-stack (cons (buffer-substring-no-properties start end) memo-station-stack))
     (let ((buffer-read-only nil))
-      (delete-region start end)
-      )
+      (delete-region start end))
     ;; (save-buffer)
     (message "delete %d chars" (- end start))))
 
@@ -306,7 +267,7 @@
 
 (defun memo-station-insert-to-shell-prompt ()
   "shellのプロンプトにメモステする"
-  (let ((dir default-directory))        ;dir=メモステモードを起動したバッファのディレクトリ
+  (let ((dir default-directory))        ; dir=メモステモードを起動したバッファのディレクトリ
     (switch-to-buffer (shell))
     (end-of-buffer)
     (if (not (eolp))
@@ -346,7 +307,6 @@
   (setq major-mode 'memo-station-mode)
   (setq mode-name "メモステモード")
   (use-local-map memo-station-mode-map)
-  ;; (memo-station-color)
   (setq buffer-read-only t)
   (set (make-local-variable 'truncate-lines) t)
   (run-hooks 'memo-station-mode-hook))
@@ -379,12 +339,11 @@
   (run-hooks 'memo-station-edit-mode-hook))
 
 (defun memo-station-get-region-str ()
+  "選択範囲の文字列取得"
   (if mark-active
       (prog1
           (buffer-substring-no-properties (region-beginning) (region-end))
-        (setq mark-active nil))
-    )
-  )
+        (setq mark-active nil))))
 
 (defun memo-station-create ()
   (interactive)
@@ -412,7 +371,7 @@
         (progn (switch-to-buffer buffname))
       (setq tag (or tag
                     (read-string "メモ検索: ")))
-      (request (concat memo-station-url "articles.txt?query=" (http-url-hexify-string tag 'utf-8))
+      (request (concat memo-station-url "articles.txt?query=" (url-hexify-string tag))
                :sync t
                :parser 'buffer-string
                :complete (function*
@@ -424,9 +383,7 @@
                             (switch-to-buffer buffname)
                             (insert data)
                             (goto-char (point-min))
-                            (memo-station-mode)
-                            )))
-      )))
+                            (memo-station-mode)))))))
 
 (provide 'memo-station)
 ;;; memo-station.el ends here
