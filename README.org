@@ -9,8 +9,7 @@
 
 ** セットアップ
 
-   : bundle
-   : rake db:migrate
+   : setup
    : rails s
    : open http://localhost:3000/
 
@@ -31,11 +30,4 @@
    : (global-set-key (kbd "C-j w") 'memo-station-create)
    : (global-set-key (kbd "C-j s") 'memo-station-search)
 
-   あと nkf が必須なので
-
-   : brew install nkf
-
 ** やること
-
-- nkf依存してるのをやめたい
-- tdiary.el のライブラリに依存しているのをやめたい

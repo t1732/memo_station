@@ -24,12 +24,16 @@
 
 ;; 設定方法
 ;;
+;; M-x package-install request
+;;
 ;; (require 'memo-station)
 ;;
 
 ;;; Code:
 
-(load "tdiary-mode")
+(require 'request)
+;; (setq request-backend 'curl)
+;; (setq request-backend 'url-retrieve)
 
 (defgroup memo-station nil
   "*メモステモード"
@@ -356,17 +360,18 @@
 (defun memo-station-edit-save-buffer ()
   "メモステファイル保存"
   (interactive)
-  (let (result)
-    (if nil
-        (setq result
-              (shell-command-on-region (point-min) (point-max) "~/src/memo-station/script/runner 'Article.text_post(STDIN.read).display'" nil))
-      (setq result
-            (memo-station-http-fetch (concat memo-station-url "articles/text_post") 'post (list (cons "content" (http-url-hexify-string (buffer-string) 'utf-8)))))
-      )
-    (memo-station-mode)
-    (memo-station-goto-segment)
-    (message "%s" result)
-    ))
+  ;; script/runner では遅すぎる
+  ;; (shell-command-on-region (point-min) (point-max) "~/src/memo-station/script/runner 'Article.text_post(STDIN.read).display'" nil)
+  (request
+   (concat memo-station-url "articles/text_post")
+   :type "POST"
+   :data (list (cons "content" (buffer-string)))
+   :parser 'buffer-string
+   :success (function*
+             (lambda (&key data &allow-other-keys)
+               (memo-station-mode)
+               (memo-station-goto-segment)
+               (message "%s" data)))))
 
 (defun memo-station-edit-mode ()
   "\\{memo-station-edit-mode-map}"
@@ -413,52 +418,21 @@
         (progn (switch-to-buffer buffname))
       (setq tag (or tag
                     (read-string "メモ検索: ")))
-      ;;     (if (string= tag "")
-      ;;         (progn
-      ;;           (setq content (memo-station-http-fetch "http://127.0.0.1:3000/article/text_get" 'get (list (cons "query" tag))))
-      ;;           )
-      ;;       )
-      ;; 英単語であれば問題ないが、日本語のタグだと http-url-hexify-string を通さないと正確に渡せない。
-      (setq content (memo-station-http-fetch (concat memo-station-url "articles.txt") 'get (list (cons "query" (http-url-hexify-string tag 'utf-8)))))
-      (setq memo-station-before-buffer (current-buffer))
-      (setq memo-station-save-window (current-window-configuration))
-      (when (get-buffer buffname)
-        (kill-buffer buffname))
-      (switch-to-buffer buffname)
-      (insert content)
-      (goto-char (point-min))
-      (memo-station-mode)
+      (request (concat memo-station-url "articles.txt?query=" (http-url-hexify-string tag 'utf-8))
+               :sync t
+               :parser 'buffer-string
+               :complete (function*
+                          (lambda (&key data &allow-other-keys)
+                            (setq memo-station-before-buffer (current-buffer))
+                            (setq memo-station-save-window (current-window-configuration))
+                            (when (get-buffer buffname)
+                              (kill-buffer buffname))
+                            (switch-to-buffer buffname)
+                            (insert data)
+                            (goto-char (point-min))
+                            (memo-station-mode)
+                            )))
       )))
-;; (memo-station-search "x")
-
-(defun memo-station-http-fetch (url method data)
-  (interactive)
-  (let ((http-fetch-terminator "-- content end --")
-        (access_result_buffer nil)
-        (default-process-coding-system '(utf-8 . utf-8)) ; LANG=ja_JP.eucJP の環境でも文字化けしないようにするため。
-        (content nil)
-        )
-    (setq access_result_buffer (http-fetch url method memo-station-auth-user memo-station-auth-password data))
-    (setq content (save-current-buffer
-                    (set-buffer access_result_buffer)
-                    ;; FIXME: http経由で取り出すと文字化けした状態で UTF-8 が来る。
-                    ;; よくわからないけど nkf -w すると読める UTF-8 になる。
-                    
-                    (shell-command-on-region (point-min) (point-max) "nkf -w -d" (current-buffer) t) ;REPLACEをtにするとバッファを表示しなくなる。
-                    
-                    ;; (encode-coding-string (buffer-string) 'utf-8 nil (current-buffer))
-                    ;; ヘッダを除いた部分のみを取得
-                    (buffer-substring
-                     (progn
-                       (goto-char (point-min))
-                       (re-search-forward "\n\n" nil t)
-                       (point))
-                     (progn
-                       (goto-char (point-min))
-                       (re-search-forward (regexp-quote http-fetch-terminator) nil t)
-                       (move-to-column 0)
-                       (point)))))
-    content))
 
 (provide 'memo-station)
 ;;; memo-station.el ends here
