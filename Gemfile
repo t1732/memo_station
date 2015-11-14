@@ -54,5 +54,5 @@ group :development, :test do
 end
 
 gem 'slim-rails'
-gem 'acts-as-taggable-on'
+gem 'acts-as-taggable-on', "< 4.0"
 gem 'rails_autolink'

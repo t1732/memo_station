@@ -217,7 +217,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  acts-as-taggable-on
+  acts-as-taggable-on (< 4.0)
   byebug
   capistrano-passenger
   capistrano-rails
