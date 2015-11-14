@@ -58,12 +58,6 @@
 (defvar memo-station-url "http://localhost:3000/"
   "*GET/POSTするURL")
 
-(defvar memo-station-auth-user nil
-  "*BASIC認証のユーザー名")
-
-(defvar memo-station-auth-password nil
-  "*BASIC認証のパスワード")
-
 ;; 以下は内部で使う変数
 
 (defvar memo-station-stack ()
