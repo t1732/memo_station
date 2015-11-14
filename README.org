@@ -17,17 +17,25 @@
 
    : cap production deploy
 
-** Emacsインタフェースの準備
+** Emacsインタフェースの設定(例)
 
-   : cp -av lib/*.el ~/.emacs.d/lib
-   : emacs ~/.emacs.d/init.el
+   memo_station.el を読めるようにする
 
-   以下を設定
+   : ln -s ~/src/memo_station/lib/memo_station.el ~/.emacs.d/lib
+
+   [[https://github.com/tkf/emacs-request][request.el]] が入っていなけれインストール
+
+   : M-x package-list-packages
+
+   curl もインストール
+
+   : brew install curl
+   : brew link curl
+
+   ~/.emacs.d/init.el に以下を設定
 
    : (require 'memo-station)
    : (setq memo-station-url "http://memo/")
    : (global-unset-key "\C-j")
    : (global-set-key (kbd "C-j w") 'memo-station-create)
    : (global-set-key (kbd "C-j s") 'memo-station-search)
-
-** やること
