@@ -51,15 +51,13 @@ class Article < ActiveRecord::Base
 
     class_methods do
       def text_post(str)
-        out = ""
-        elems = text_to_array(str)
-        out << "個数: #{elems.size}\n"
-        out << "#{elems.inspect}\n" if $DEBUG
-        logger.debug(elems)
-        elems.each do |elem|
-          out << text_post_one(elem)
+        "".tap do |out|
+          elems = text_to_array(str)
+          logger.debug(elems)
+          out << "個数: #{elems.size}\n"
+          out << "#{elems.inspect}\n" if $DEBUG
+          out << elems.collect { |e| text_post_one(e) }.join("\n")
         end
-        out
       end
 
       def string_normalize(str)
@@ -106,15 +104,15 @@ class Article < ActiveRecord::Base
 
         delmark = " "
         if article.tag_list.include?("_del")
-          article.destroy
+          article.destroy!
           delmark = "D"
         end
 
-        "#{mark + delmark} [#{article.id}] #{article.title} #{errors}".rstrip + "\n"
+        "#{mark + delmark} [#{article.id}] #{article.title} #{errors}".strip
       end
 
       def text_resolve?(str)
-        str.include?("Title:") && str.include?("Tag:")
+        str.match(/^Title:/i) && str.match(/^Tag:/i)
       end
 
       def text_to_array(text)
@@ -128,17 +126,17 @@ class Article < ActiveRecord::Base
       def text_parse(str)
         {}.tap do |e|
           str = str.force_encoding("UTF-8")
-          if md = str.match(/^Id:\s*(\d+)$/i)
-            e[:id] = md.captures.first.to_i
+          if md = str.match(/^Id:\s*(?<id>\d+)$/i)
+            e[:id] = md[:id]
           end
-          if md = str.match(/^Title:(.+)$/i)
-            e[:title] = string_normalize(md.captures.first)
+          if md = str.match(/^Title:(?<title>.+)$/i)
+            e[:title] = string_normalize(md[:title])
           end
-          if md = str.match(/^Tag:(.+)$/i)
-            e[:tag_list] = string_normalize(md.captures.first)
+          if md = str.match(/^Tag:(?<tag_list>.+)$/i)
+            e[:tag_list] = string_normalize(md[:tag_list])
           end
-          if md = str.match(/^#{text_separator}\n(.*)\z/mi)
-            e[:body] = md.captures.first
+          if md = str.match(/^#{text_separator}\n(?<body>.*)\z/mi)
+            e[:body] = md[:body]
           end
         end
       end
@@ -162,6 +160,8 @@ class Article < ActiveRecord::Base
 
   concerning :Task do
     class_methods do
+      # データ移行用
+      #
       # production -> staging
       #
       #   rails runner -e production 'Article.data_export'
@@ -172,16 +172,18 @@ class Article < ActiveRecord::Base
       #
       #   rails runner -e production 'Article.data_export'
       #   rails runner -e production 'Article.data_import'
+      #
       def data_export
         rows = all.order(:id).collect(&:to_h)
         bin = Marshal.dump(rows)
-        marshal_file.open("wb") {|f|f << bin}
+        marshal_file.write(bin)
+
+        # check
         rows2 = Marshal.load(marshal_file.read)
-        if rows2 == rows
-          p "OK"
-        else
-          p "ERROR"
+        if rows2 != rows
+          raise "ERROR"
         end
+        p "OK"
       end
 
       def data_import
@@ -203,10 +205,10 @@ class Article < ActiveRecord::Base
           end
         end
 
+        # check
         rows.each do |row|
           article = find(row["id"])
-          if article.to_h == row
-          else
+          if article.to_h != row
             p row
             p article.to_h
             raise
