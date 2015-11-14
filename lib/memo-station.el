@@ -184,13 +184,13 @@
 (defun memo-station-next ()
   "次のデータに移動"
   (interactive)
-  (when (memo-station-next-exist-p)
+  (when (memo-station-next-exist?)
     (forward-line)
     (when (search-forward-regexp memo-station-separator-regexp nil t)
       (beginning-of-line)
       (recenter 0))))
 
-(defun memo-station-next-exist-p ()
+(defun memo-station-next-exist? ()
   "次のデータが存在するか調べる"
   (interactive)
   (save-excursion
@@ -378,7 +378,7 @@
   (set (make-local-variable 'truncate-lines) t)
   (run-hooks 'memo-station-edit-mode-hook))
 
-(defun memo-station-get-select-str ()
+(defun memo-station-get-region-str ()
   (if mark-active
       (prog1
           (buffer-substring-no-properties (region-beginning) (region-end))
@@ -389,7 +389,7 @@
 (defun memo-station-create ()
   (interactive)
   (let ((buffname "*新規メモ*")
-        (select-str (memo-station-get-select-str)))
+        (region-str (memo-station-get-region-str)))
     ;;     (when (get-buffer buffname)
     ;;       (kill-buffer buffname))
     (if (get-buffer buffname)
@@ -398,7 +398,7 @@
       (insert "Title: \n"
               "Tag: \n"
               "--text follows this line--\n"
-              (or select-str ""))
+              (or region-str ""))
       (when t
         (beginning-of-buffer)       ; 「Title:」の直後にカーソル移動
         (move-end-of-line 1))
