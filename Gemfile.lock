@@ -58,6 +58,11 @@ GEM
     capistrano-rails (1.1.5)
       capistrano (~> 3.1)
       capistrano-bundler (~> 1.1)
+    capistrano-rbenv (2.0.3)
+      capistrano (~> 3.1)
+      sshkit (~> 1.3)
+    capistrano-withrsync (0.1.2)
+      capistrano (>= 3.1)
     coffee-rails (4.1.0)
       coffee-script (>= 2.2.0)
       railties (>= 4.0.0, < 5.0)
@@ -214,10 +219,10 @@ PLATFORMS
 DEPENDENCIES
   acts-as-taggable-on
   byebug
-  capistrano
-  capistrano-bundler
   capistrano-passenger
   capistrano-rails
+  capistrano-rbenv
+  capistrano-withrsync
   coffee-rails (~> 4.1.0)
   jbuilder (~> 2.0)
   jquery-rails

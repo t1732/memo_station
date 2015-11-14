@@ -42,10 +42,10 @@ group :development, :test do
   gem 'spring'
   gem 'spring-commands-rspec'
 
-  gem 'capistrano'
-  gem 'capistrano-rails'
-  gem 'capistrano-bundler'
-  gem 'capistrano-passenger'
+  gem 'capistrano-rails', require: false        # capistrano + capistrano-bundler
+  gem 'capistrano-passenger', require: false
+  gem 'capistrano-rbenv', require: false
+  gem 'capistrano-withrsync', require: false
 
   gem 'rspec-rails'
   gem 'test-unit'
