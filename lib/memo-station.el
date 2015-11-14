@@ -226,7 +226,7 @@
   (interactive)
   (let (start end)
     (memo-station-goto-segment)
-    (forward-line)
+    (search-forward "--text follows this line--\n")
     (setq start (point))
     (memo-station-next)
     (setq end (1- (point)))             ;-1は最後の改行を取るため
