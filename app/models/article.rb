@@ -87,7 +87,8 @@ class Article < ActiveRecord::Base
         end
         article.attributes = attrs.slice(:title, :body, :tag_list)
 
-        save_p = article.new_record?
+        save_p = nil
+        save_p ||= article.new_record?
         save_p ||= !article.same_content?(pre_article)
         save_p ||= old_tag_list.sort != article.tag_list.sort
 
@@ -108,7 +109,7 @@ class Article < ActiveRecord::Base
           delmark = "D"
         end
 
-        "#{mark + delmark} [#{article.id}] #{article.title} #{errors}".strip
+        "#{mark + delmark} [#{article.id}] #{article.title} #{errors}".rstrip
       end
 
       def text_resolve?(str)
@@ -136,7 +137,7 @@ class Article < ActiveRecord::Base
             e[:tag_list] = string_normalize(md[:tag_list])
           end
           if md = str.match(/^#{text_separator}\n(?<body>.*)\z/mi)
-            e[:body] = md[:body]
+            e[:body] = md[:body].strip
           end
         end
       end
