@@ -37,39 +37,57 @@ RSpec.describe Article, type: :model do
   end
 
   it "タグ名の大文字小文字は区別せずuniqにする" do
-    r = Article.create!(:title => hex, :body => hex, :tag_list => "foo FOO Foo")
-    assert_equal ["foo"], Article.find(r.id).tag_list
+    article = Article.create!(:title => hex, :body => hex, :tag_list => "foo FOO Foo")
+    assert_equal ["foo"], article.tag_list
   end
 
   context "テキスト" do
-    it "テキストで参照できる" do
+    it "テキスト記事化" do
       assert article_create.to_text
     end
 
-    it "テキストから作成できる" do
-      result = Article.text_post("
-Title: #{hex}
-Tag: #{hex}
+    describe "新規投稿" do
+      before do
+        @result = Article.text_post("
+Title: title1
+Tag: tag1
 --text follows this line--
-#{hex}
+body1
 ")
-      assert Article.exists?
-      assert result
-    end
+        @article = Article.first
+      end
+      it do
+        assert Article.exists?
+        @result.should == "個数: 1\nA  [1] title1"
+      end
 
-    it "テキストから更新できる" do
-      article = article_create
-      Article.text_post("
-Id: #{article.id}
-Title: (changed_title)
-Tag: (changed_tag)
+      describe "更新" do
+        before do
+          @result = Article.text_post("
+Id: #{@article.id}
+Title: title2
+Tag: tag2
 --text follows this line--
-(changed_body)
+body2
 ")
-      article.reload
-      assert_equal "(changed_title)", article.title
-      assert_equal ["(changed_tag)"], article.tag_list.sort
-      assert_equal "(changed_body)", article.body
+          @article.reload
+        end
+        it do
+          assert_equal "title2", @article.title
+          assert_equal ["tag2"], @article.tag_list.sort
+          assert_equal "body2", @article.body
+          @result.should == "個数: 1\nU  [1] title2"
+        end
+      end
+
+      describe "ポストしたけど同じ内容なのでスキップ" do
+        before do
+          @result = Article.text_post(@article.to_text)
+        end
+        it do
+          @result.should == "個数: 1\n   [1] title1"
+        end
+      end
     end
   end
 end

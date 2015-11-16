@@ -28,7 +28,7 @@ class ArticlesController < ApplicationController
   end
 
   def render_text_for_emacs(str)
-    render :text => str + "-- content end --" + "\n"
+    render :text => str
   end
 
   def show

@@ -1,6 +1,6 @@
 ;;; memo-station.el --- メモを集中管理する
 
-;; Copyright (C) 2002,2006,2011,2012,2015 Free Software Foundation, Inc.
+;; Copyright (C) 2002-2015 Free Software Foundation, Inc.
 
 ;; Author: akicho8 <akicho8@gmail.com>
 ;; Keywords: program text
@@ -24,12 +24,14 @@
 
 ;; 設定方法
 ;;
+;; M-x package-install request
+;;
 ;; (require 'memo-station)
 ;;
 
 ;;; Code:
 
-(load "tdiary-mode")
+(require 'request)
 
 (defgroup memo-station nil
   "*メモステモード"
@@ -53,12 +55,6 @@
 
 (defvar memo-station-url "http://localhost:3000/"
   "*GET/POSTするURL")
-
-(defvar memo-station-auth-user nil
-  "*BASIC認証のユーザー名")
-
-(defvar memo-station-auth-password nil
-  "*BASIC認証のパスワード")
 
 ;; 以下は内部で使う変数
 
@@ -110,41 +106,6 @@
     (substitute-key-definition 'save-buffer 'memo-station-edit-save-buffer map global-map)
     (setq memo-station-edit-mode-map map)))
 
-(defvar memo-station-overlays nil)
-(defvar memo-station-underline-overlays nil)
-(defface memo-station-separator-face
-  '((((class color)
-      (background dark))
-     (:background "red" :bold t :foreground "blue"))
-    (((class color)
-      (background light))
-     (:bold t :foreground "red"))
-    (t
-     ()))
-  "セパレータ用Face")
-
-(defun memo-station-color ()
-  "*Highlight the file buffer"
-  (interactive)
-  (save-excursion
-    (let (ov)
-      (goto-char (point-min))
-      (while (re-search-forward memo-station-separator-regexp nil t)
-        (setq ov (make-overlay (match-beginning 0) (match-end 0)))
-        (overlay-put ov 'face 'memo-station-separator-face)
-        (overlay-put ov 'priority 0)
-        (setq memo-station-overlays (cons ov memo-station-overlays))
-        (make-local-hook 'after-change-functions)
-        (remove-hook 'after-change-functions 'memo-station-remove-overlays)))))
-
-(defun memo-station-remove-overlays (&optional beg end length)
-  (interactive)
-  (if (and beg end (= beg end))
-      ()
-    (while memo-station-overlays
-      (delete-overlay (car memo-station-overlays))
-      (setq memo-station-overlays (cdr memo-station-overlays)))))
-
 (defun memo-station ()
   "メモステ起動
 リュージョンが有効なら先頭に追加する
@@ -186,13 +147,13 @@
 (defun memo-station-next ()
   "次のデータに移動"
   (interactive)
-  (when (memo-station-next-exist-p)
+  (when (memo-station-next-exist?)
     (forward-line)
     (when (search-forward-regexp memo-station-separator-regexp nil t)
       (beginning-of-line)
       (recenter 0))))
 
-(defun memo-station-next-exist-p ()
+(defun memo-station-next-exist? ()
   "次のデータが存在するか調べる"
   (interactive)
   (save-excursion
@@ -210,7 +171,6 @@
 (defun memo-station-exit ()
   "メモステ終了"
   (interactive)
-  (memo-station-remove-overlays)
   (kill-buffer nil)
   (set-window-configuration memo-station-save-window)
   (run-hooks 'memo-station-exit-hook))
@@ -228,7 +188,7 @@
   (interactive)
   (let (start end)
     (memo-station-goto-segment)
-    (forward-line)
+    (search-forward "--text follows this line--\n")
     (setq start (point))
     (memo-station-next)
     (setq end (1- (point)))             ;-1は最後の改行を取るため
@@ -265,8 +225,7 @@
     (setq end (point))
     (setq memo-station-stack (cons (buffer-substring-no-properties start end) memo-station-stack))
     (let ((buffer-read-only nil))
-      (delete-region start end)
-      )
+      (delete-region start end))
     ;; (save-buffer)
     (message "delete %d chars" (- end start))))
 
@@ -308,7 +267,7 @@
 
 (defun memo-station-insert-to-shell-prompt ()
   "shellのプロンプトにメモステする"
-  (let ((dir default-directory))        ;dir=メモステモードを起動したバッファのディレクトリ
+  (let ((dir default-directory))        ; dir=メモステモードを起動したバッファのディレクトリ
     (switch-to-buffer (shell))
     (end-of-buffer)
     (if (not (eolp))
@@ -348,7 +307,6 @@
   (setq major-mode 'memo-station-mode)
   (setq mode-name "メモステモード")
   (use-local-map memo-station-mode-map)
-  ;; (memo-station-color)
   (setq buffer-read-only t)
   (set (make-local-variable 'truncate-lines) t)
   (run-hooks 'memo-station-mode-hook))
@@ -356,17 +314,18 @@
 (defun memo-station-edit-save-buffer ()
   "メモステファイル保存"
   (interactive)
-  (let (result)
-    (if nil
-        (setq result
-              (shell-command-on-region (point-min) (point-max) "~/src/memo-station/script/runner 'Article.text_post(STDIN.read).display'" nil))
-      (setq result
-            (memo-station-http-fetch (concat memo-station-url "articles/text_post") 'post (list (cons "content" (http-url-hexify-string (buffer-string) 'utf-8)))))
-      )
-    (memo-station-mode)
-    (memo-station-goto-segment)
-    (message "%s" result)
-    ))
+  ;; script/runner では遅すぎる
+  ;; (shell-command-on-region (point-min) (point-max) "~/src/memo-station/script/runner 'Article.text_post(STDIN.read).display'" nil)
+  (request
+   (concat memo-station-url "articles/text_post")
+   :type "POST"
+   :data (list (cons "content" (buffer-string)))
+   :parser 'buffer-string
+   :success (function*
+             (lambda (&key data &allow-other-keys)
+               (memo-station-mode)
+               (memo-station-goto-segment)
+               (message "%s" data)))))
 
 (defun memo-station-edit-mode ()
   "\\{memo-station-edit-mode-map}"
@@ -379,18 +338,17 @@
   (set (make-local-variable 'truncate-lines) t)
   (run-hooks 'memo-station-edit-mode-hook))
 
-(defun memo-station-get-select-str ()
+(defun memo-station-get-region-str ()
+  "選択範囲の文字列取得"
   (if mark-active
       (prog1
           (buffer-substring-no-properties (region-beginning) (region-end))
-        (setq mark-active nil))
-    )
-  )
+        (setq mark-active nil))))
 
 (defun memo-station-create ()
   (interactive)
   (let ((buffname "*新規メモ*")
-        (select-str (memo-station-get-select-str)))
+        (region-str (memo-station-get-region-str)))
     ;;     (when (get-buffer buffname)
     ;;       (kill-buffer buffname))
     (if (get-buffer buffname)
@@ -399,7 +357,7 @@
       (insert "Title: \n"
               "Tag: \n"
               "--text follows this line--\n"
-              (or select-str ""))
+              (or region-str ""))
       (when t
         (beginning-of-buffer)       ; 「Title:」の直後にカーソル移動
         (move-end-of-line 1))
@@ -413,52 +371,19 @@
         (progn (switch-to-buffer buffname))
       (setq tag (or tag
                     (read-string "メモ検索: ")))
-      ;;     (if (string= tag "")
-      ;;         (progn
-      ;;           (setq content (memo-station-http-fetch "http://127.0.0.1:3000/article/text_get" 'get (list (cons "query" tag))))
-      ;;           )
-      ;;       )
-      ;; 英単語であれば問題ないが、日本語のタグだと http-url-hexify-string を通さないと正確に渡せない。
-      (setq content (memo-station-http-fetch (concat memo-station-url "articles.txt") 'get (list (cons "query" (http-url-hexify-string tag 'utf-8)))))
-      (setq memo-station-before-buffer (current-buffer))
-      (setq memo-station-save-window (current-window-configuration))
-      (when (get-buffer buffname)
-        (kill-buffer buffname))
-      (switch-to-buffer buffname)
-      (insert content)
-      (goto-char (point-min))
-      (memo-station-mode)
-      )))
-;; (memo-station-search "x")
-
-(defun memo-station-http-fetch (url method data)
-  (interactive)
-  (let ((http-fetch-terminator "-- content end --")
-        (access_result_buffer nil)
-        (default-process-coding-system '(utf-8 . utf-8)) ; LANG=ja_JP.eucJP の環境でも文字化けしないようにするため。
-        (content nil)
-        )
-    (setq access_result_buffer (http-fetch url method memo-station-auth-user memo-station-auth-password data))
-    (setq content (save-current-buffer
-                    (set-buffer access_result_buffer)
-                    ;; FIXME: http経由で取り出すと文字化けした状態で UTF-8 が来る。
-                    ;; よくわからないけど nkf -w すると読める UTF-8 になる。
-                    
-                    (shell-command-on-region (point-min) (point-max) "nkf -w -d" (current-buffer) t) ;REPLACEをtにするとバッファを表示しなくなる。
-                    
-                    ;; (encode-coding-string (buffer-string) 'utf-8 nil (current-buffer))
-                    ;; ヘッダを除いた部分のみを取得
-                    (buffer-substring
-                     (progn
-                       (goto-char (point-min))
-                       (re-search-forward "\n\n" nil t)
-                       (point))
-                     (progn
-                       (goto-char (point-min))
-                       (re-search-forward (regexp-quote http-fetch-terminator) nil t)
-                       (move-to-column 0)
-                       (point)))))
-    content))
+      (request (concat memo-station-url "articles.txt?query=" (url-hexify-string tag))
+               :sync t
+               :parser 'buffer-string
+               :complete (function*
+                          (lambda (&key data &allow-other-keys)
+                            (setq memo-station-before-buffer (current-buffer))
+                            (setq memo-station-save-window (current-window-configuration))
+                            (when (get-buffer buffname)
+                              (kill-buffer buffname))
+                            (switch-to-buffer buffname)
+                            (insert data)
+                            (goto-char (point-min))
+                            (memo-station-mode)))))))
 
 (provide 'memo-station)
 ;;; memo-station.el ends here

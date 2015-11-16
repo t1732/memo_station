@@ -2,10 +2,11 @@
 lock '3.4.0'
 
 set :application, "memo_station"
-set :repo_url, "file://#{Pathname(__FILE__).dirname.dirname.expand_path}"
+set :repo_url, "file://#{Pathname(__dir__).dirname}"
 
 # Default branch is :master
 # ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call
+set :branch, `git rev-parse --abbrev-ref HEAD`.chomp
 
 # Default deploy_to directory is /var/www/my_app_name
 set :deploy_to, proc { "/var/www/#{fetch(:application)}_#{fetch(:stage)}" }
@@ -33,29 +34,3 @@ set :linked_dirs, fetch(:linked_dirs, []).push('bin', 'log', 'tmp/pids', 'tmp/ca
 
 # Default value for keep_releases is 5
 # set :keep_releases, 5
-
-namespace :deploy do
-  desc 'Restart application'
-  task :restart do
-    on roles(:app), in: :sequence, wait: 5 do
-      execute :touch, release_path.join('tmp/restart.txt')
-    end
-  end
-
-  after :publishing, :restart
-
-  after :restart, :clear_cache do
-    on roles(:web), in: :groups, limit: 3, wait: 10 do
-      # Here we can do anything such as:
-      # within release_path do
-      #   execute :rake, 'cache:clear'
-      # end
-    end
-  end
-
-  after "deploy:assets:precompile", :chmod_R do
-    on roles(:web), in: :groups, limit: 3, wait: 10 do
-      execute :chmod, "-R ug+w #{fetch(:deploy_to)}"
-    end
-  end
-end
