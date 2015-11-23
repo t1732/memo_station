@@ -1,7 +1,7 @@
 section
   h2
     = link_to(article.title, article)
-  = article_body(article.body)
+  pre= article_body(article.body)
   p
     = article_tag_list(article.tag_list)
   p

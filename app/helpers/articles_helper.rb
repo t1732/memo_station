@@ -6,7 +6,6 @@ module ArticlesHelper
   def article_body(body)
     s = body.to_s
     s = html_escape(s)
-    s = simple_format(s)
     s = auto_link(s)
     s.html_safe
   end
