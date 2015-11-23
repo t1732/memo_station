@@ -3,7 +3,7 @@ class Article < ActiveRecord::Base
 
   default_scope { order(arel_table[:updated_at].desc) }
 
-  before_validation :on => :create do
+  before_validation on: :create do
     self.tag_list = normalized_tag_list
     true
   end
@@ -18,13 +18,13 @@ class Article < ActiveRecord::Base
     true
   end
 
-  with_options(:presence => true) do |o|
-    o.validates :title
-    o.validates :tag_list
+  with_options(presence: true) do
+    validates :title
+    validates :tag_list
   end
 
-  with_options(:allow_blank => true) do |o|
-    o.validates :title, :uniqueness => true
+  with_options(allow_blank: true) do
+    validates :title, uniqueness: true
   end
 
   def to_h
@@ -46,7 +46,7 @@ class Article < ActiveRecord::Base
   concerning :EmacsSupport do
     included do
       cattr_accessor(:text_separator) { "--text follows this line--" }
-      delegate :string_normalize, :to => "self.class"
+      delegate :string_normalize, to: "self.class"
     end
 
     class_methods do
@@ -144,7 +144,7 @@ class Article < ActiveRecord::Base
     end
 
     def same_content?(other)
-      title == other.title && body == other.body
+      [title, body] == [other.title, other.body]
     end
 
     def to_text

@@ -4,14 +4,16 @@ module ArticlesHelper
   end
 
   def article_body(body)
-    body = body.to_s
-    body = html_escape(body)
-    body = simple_format(body)
-    body = auto_link(body)
-    body.html_safe
+    s = body.to_s
+    s = html_escape(s)
+    s = simple_format(s)
+    s = auto_link(s)
+    s.html_safe
   end
 
   def article_tag_list(tag_list)
-    tag_list.collect {|e|link_to(e, polymorphic_path([:articles], :query => e))}.join(" ").html_safe
+    tag_list.collect { |e|
+      link_to(e, [:articles, :query => e])
+    }.join(" ").html_safe
   end
 end
