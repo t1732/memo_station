@@ -54,9 +54,11 @@ class Article < ActiveRecord::Base
         "".tap do |out|
           elems = text_to_array(str)
           logger.debug(elems)
-          out << "個数: #{elems.size}\n"
+          elems2 = elems.collect { |e| text_post_one(e) }.compact
+          skip = elems.size - elems2.size
+          out << "ポスト数: #{elems.size}, 処理数: #{elems2.size}, skip: #{skip}\n"
           out << "#{elems.inspect}\n" if $DEBUG
-          out << elems.collect { |e| text_post_one(e) }.join("\n")
+          out << elems2.join("\n")
         end
       end
 
@@ -92,6 +94,12 @@ class Article < ActiveRecord::Base
         save_p ||= !article.same_content?(pre_article)
         save_p ||= old_tag_list.sort != article.tag_list.sort
 
+        del_p = article.tag_list.include?("_del")
+
+        if !save_p && !del_p
+          return
+        end
+
         errors = ""
         mark = " "
         if save_p
@@ -104,7 +112,7 @@ class Article < ActiveRecord::Base
         end
 
         delmark = " "
-        if article.tag_list.include?("_del")
+        if del_p
           article.destroy!
           delmark = "D"
         end
