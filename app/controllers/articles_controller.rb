@@ -3,6 +3,12 @@
 class ArticlesController < ApplicationController
   before_action :set_article, only: [:show, :edit, :update, :destroy]
 
+  if Rails.env.development?
+    before_action do
+      logger.debug [request.method, request.raw_post, request.query_string, params]
+    end
+  end
+
   def index
     if params.has_key?(:query)
       @articles = Article.tagged_with(params[:query]).limit(params[:limit] || 100)
@@ -12,21 +18,12 @@ class ArticlesController < ApplicationController
     respond_to do |format|
       format.html
       format.xml { render :xml => @articles }
-      format.txt { render_text_for_emacs(Article.separated_text_format(@articles)) }
+      format.txt { render :text => Article.separated_text_format(@articles) }
     end
   end
 
   def text_post
-    out = ""
-    if Rails.env.development?
-      out << [request.method, request.raw_post, request.query_string, params].inspect + "\n"
-    end
-    out << Article.text_post(params[:content])
-    render_text_for_emacs(out)
-  end
-
-  def render_text_for_emacs(str)
-    render :text => str
+    render :text => Article.text_post(params[:content])
   end
 
   def show
