@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 class ArticlesController < ApplicationController
   before_action :set_article, only: [:show, :edit, :update, :destroy]
 
@@ -10,10 +8,9 @@ class ArticlesController < ApplicationController
   end
 
   def index
+    @articles = Article.limit(params[:limit] || 100)
     if params.has_key?(:query)
-      @articles = Article.tagged_with(params[:query]).limit(params[:limit] || 100)
-    else
-      @articles = Article.limit(params[:limit] || 100)
+      @articles = @articles.tagged_with(params[:query])
     end
     respond_to do |format|
       format.html
@@ -21,6 +18,9 @@ class ArticlesController < ApplicationController
       format.xml  { render :xml => @articles.to_xml(:methods => :tag_list, :dasherize => false) }
       format.txt  { render :text => Article.separated_text_format(@articles) }
     end
+  end
+
+  def show
     respond_to do |format|
       format.html
       format.json { render :json => @article.to_json(:methods => :tag_list) }
@@ -29,18 +29,15 @@ class ArticlesController < ApplicationController
     end
   end
 
-  def text_post
-    render :text => Article.text_post(params[:content])
-  end
-
-  def show
-  end
-
   def new
     @article = Article.new
   end
 
   def edit
+  end
+
+  def text_post
+    render :text => Article.text_post(params[:content])
   end
 
   def create
@@ -72,7 +69,7 @@ class ArticlesController < ApplicationController
   def destroy
     @article.destroy
     respond_to do |format|
-      format.html { redirect_to articles_url }
+      format.html { redirect_to :articles }
       format.json { head :no_content }
     end
   end
