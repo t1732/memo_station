@@ -17,8 +17,15 @@ class ArticlesController < ApplicationController
     end
     respond_to do |format|
       format.html
-      format.xml { render :xml => @articles }
-      format.txt { render :text => Article.separated_text_format(@articles) }
+      format.json { render :json => @articles.to_json(:methods => :tag_list) }
+      format.xml  { render :xml => @articles.to_xml(:methods => :tag_list, :dasherize => false) }
+      format.txt  { render :text => Article.separated_text_format(@articles) }
+    end
+    respond_to do |format|
+      format.html
+      format.json { render :json => @article.to_json(:methods => :tag_list) }
+      format.xml  { render :xml => @article.to_xml(:methods => :tag_list, :dasherize => false) }
+      format.txt  { render :text => Article.separated_text_format([@article]) }
     end
   end
 
