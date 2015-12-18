@@ -3,7 +3,7 @@ nginx:
   ports:
     - '8080:80'
   volumes_from:
-    - datastore
+    - datastore:ro
   links:
     - rails
 
@@ -18,4 +18,4 @@ rails:
     RAILS_ENV: production
     DATABASE_PATH: /data/memo_station_production.sqlite3
   volumes_from:
-    - datastore
+    - datastore:rw
