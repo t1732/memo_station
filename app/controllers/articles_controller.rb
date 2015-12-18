@@ -1,37 +1,32 @@
-# -*- coding: utf-8 -*-
-
 class ArticlesController < ApplicationController
   before_action :set_article, only: [:show, :edit, :update, :destroy]
 
-  def index
-    if params.has_key?(:query)
-      @articles = Article.tagged_with(params[:query]).limit(params[:limit] || 100)
-    else
-      @articles = Article.limit(params[:limit] || 100)
+  if Rails.env.development?
+    before_action do
+      logger.debug [request.method, request.raw_post, request.query_string, params]
     end
-    @articles = @articles.order(:updated_at => :desc)
+  end
 
+  def index
+    @articles = Article.limit(params[:limit] || 100)
+    if params.has_key?(:query)
+      @articles = @articles.tagged_with(params[:query])
+    end
     respond_to do |format|
       format.html
-      format.xml { render :xml => @articles }
-      format.txt { render_text_for_emacs(Article.separated_text_format(@articles)) }
+      format.json { render :json => @articles.to_json(:methods => :tag_list) }
+      format.xml  { render :xml => @articles.to_xml(:methods => :tag_list, :dasherize => false) }
+      format.txt  { render :text => Article.separated_text_format(@articles) }
     end
-  end
-
-  def text_post
-    out = ""
-    if Rails.env.development?
-      out << [request.method, request.raw_post, request.query_string, params].inspect + "\n"
-    end
-    out << Article.text_post(params[:content])
-    render_text_for_emacs(out)
-  end
-
-  def render_text_for_emacs(str)
-    render :text => str
   end
 
   def show
+    respond_to do |format|
+      format.html
+      format.json { render :json => @article.to_json(:methods => :tag_list) }
+      format.xml  { render :xml => @article.to_xml(:methods => :tag_list, :dasherize => false) }
+      format.txt  { render :text => Article.separated_text_format([@article]) }
+    end
   end
 
   def new
@@ -39,6 +34,10 @@ class ArticlesController < ApplicationController
   end
 
   def edit
+  end
+
+  def text_post
+    render :text => Article.text_post(params[:content])
   end
 
   def create
@@ -70,7 +69,7 @@ class ArticlesController < ApplicationController
   def destroy
     @article.destroy
     respond_to do |format|
-      format.html { redirect_to articles_url }
+      format.html { redirect_to :articles }
       format.json { head :no_content }
     end
   end

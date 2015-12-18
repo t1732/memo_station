@@ -10,3 +10,12 @@ AllCops:
 # Configuration parameters: EnforcedStyle, SupportedStyles.
 Style/SpaceBeforeBlockBraces:
   Enabled: true
+
+# Offense count: 2
+# Cop supports --auto-correct.
+# Configuration parameters: MaxLineLength.
+Style/IfUnlessModifier:
+  Enabled: false
+
+Style/ExtraSpacing:
+  Enabled: false

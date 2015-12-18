@@ -3,7 +3,7 @@ class Article < ActiveRecord::Base
 
   default_scope { order(arel_table[:updated_at].desc) }
 
-  before_validation :on => :create do
+  before_validation on: :create do
     self.tag_list = normalized_tag_list
     true
   end
@@ -18,13 +18,13 @@ class Article < ActiveRecord::Base
     true
   end
 
-  with_options(:presence => true) do |o|
-    o.validates :title
-    o.validates :tag_list
+  with_options(presence: true) do
+    validates :title
+    validates :tag_list
   end
 
-  with_options(:allow_blank => true) do |o|
-    o.validates :title, :uniqueness => true
+  with_options(allow_blank: true) do
+    validates :title, uniqueness: true
   end
 
   def to_h
@@ -46,7 +46,7 @@ class Article < ActiveRecord::Base
   concerning :EmacsSupport do
     included do
       cattr_accessor(:text_separator) { "--text follows this line--" }
-      delegate :string_normalize, :to => "self.class"
+      delegate :string_normalize, to: "self.class"
     end
 
     class_methods do
@@ -54,9 +54,11 @@ class Article < ActiveRecord::Base
         "".tap do |out|
           elems = text_to_array(str)
           logger.debug(elems)
-          out << "個数: #{elems.size}\n"
+          elems2 = elems.collect { |e| text_post_one(e) }.compact
+          skip = elems.size - elems2.size
+          out << "ポスト数: #{elems.size}, 処理数: #{elems2.size}, skip: #{skip}\n"
           out << "#{elems.inspect}\n" if $DEBUG
-          out << elems.collect { |e| text_post_one(e) }.join("\n")
+          out << elems2.join("\n")
         end
       end
 
@@ -92,6 +94,12 @@ class Article < ActiveRecord::Base
         save_p ||= !article.same_content?(pre_article)
         save_p ||= old_tag_list.sort != article.tag_list.sort
 
+        del_p = article.tag_list.include?("_del")
+
+        if !save_p && !del_p
+          return
+        end
+
         errors = ""
         mark = " "
         if save_p
@@ -104,7 +112,7 @@ class Article < ActiveRecord::Base
         end
 
         delmark = " "
-        if article.tag_list.include?("_del")
+        if del_p
           article.destroy!
           delmark = "D"
         end
@@ -144,7 +152,7 @@ class Article < ActiveRecord::Base
     end
 
     def same_content?(other)
-      title == other.title && body == other.body
+      [title, body] == [other.title, other.body]
     end
 
     def to_text
