@@ -306,6 +306,7 @@
   (kill-all-local-variables)
   (setq major-mode 'memo-station-mode)
   (setq mode-name "メモステモード")
+  (memo-station-font-lock)
   (use-local-map memo-station-mode-map)
   (setq buffer-read-only t)
   (set (make-local-variable 'truncate-lines) t)
@@ -333,6 +334,7 @@
   (kill-all-local-variables)
   (setq major-mode 'memo-station-edit-mode)
   (setq mode-name "メモステ編集モード")
+  (memo-station-font-lock)
   (use-local-map memo-station-edit-mode-map)
   (setq buffer-read-only nil)
   (set (make-local-variable 'truncate-lines) t)
@@ -384,6 +386,15 @@
                             (insert data)
                             (goto-char (point-min))
                             (memo-station-mode)))))))
+
+(defun memo-station-font-lock ()
+  (font-lock-add-keywords
+   nil
+   '(
+     ("\\<\\(Title\\|Id\\|Tag\\|Date\\):" 1 font-lock-keyword-face t)
+     ("^\\(-+\\)$" 1 font-lock-comment-face t)
+     ("\\(--text follows this line--\\)" 1 font-lock-keyword-face t)
+     )))
 
 (provide 'memo-station)
 ;;; memo-station.el ends here
