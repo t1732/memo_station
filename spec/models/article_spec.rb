@@ -58,7 +58,7 @@ body1
       end
       it do
         assert Article.exists?
-        @result.should == "ポスト数: 1, 処理数: 1, skip: 0\nA  [1] title1"
+        @result.should == "ポスト数: 1, 処理数: 1, skip: 0\nA   [1] title1"
       end
 
       describe "更新" do
@@ -76,7 +76,7 @@ body2
           assert_equal "title2", @article.title
           assert_equal ["tag2"], @article.tag_list.sort
           assert_equal "body2", @article.body
-          @result.should == "ポスト数: 1, 処理数: 1, skip: 0\nU  [1] title2"
+          @result.should == "ポスト数: 1, 処理数: 1, skip: 0\nU   [1] title2"
         end
       end
 

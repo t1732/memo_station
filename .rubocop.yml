@@ -19,3 +19,6 @@ Style/IfUnlessModifier:
 
 Style/ExtraSpacing:
   Enabled: false
+
+Rails/Output:
+  Enabled: false

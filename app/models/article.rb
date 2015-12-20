@@ -78,46 +78,31 @@ class Article < ActiveRecord::Base
 
       def text_post_one(str)
         attrs = text_parse(str)
-
-        old_tag_list = ""
         if attrs[:id]
           article = find(attrs[:id])
-          pre_article = article.dup # cloneはだめ
-          old_tag_list = article.tag_list
+          if article.same_content?(attrs)
+            return
+          end
         else
           article = new
         end
-        article.attributes = attrs.slice(:title, :body, :tag_list)
-
-        save_p = nil
-        save_p ||= article.new_record?
-        save_p ||= !article.same_content?(pre_article)
-        save_p ||= old_tag_list.sort != article.tag_list.sort
-
-        del_p = article.tag_list.include?("_del")
-
-        if !save_p && !del_p
-          return
-        end
-
-        errors = ""
-        mark = " "
-        if save_p
-          mark = article.new_record? ? "A" : "U"
-          if article.save
-          else
-            mark = "E"
-            errors = article.errors.full_messages.join(" ")
-          end
-        end
-
-        delmark = " "
-        if del_p
+        info = text_post_one_save(article, attrs)
+        if article.tag_list.include?("_del")
           article.destroy!
-          delmark = "D"
+          info[:mark] << "D"
         end
+        format("%-3s [#{article.id}] #{article.title} #{info[:errors]}", info[:mark]).rstrip
+      end
 
-        "#{mark + delmark} [#{article.id}] #{article.title} #{errors}".rstrip
+      def text_post_one_save(article, attrs)
+        article.attributes = attrs.slice(:title, :body, :tag_list)
+        errors = ""
+        mark = article.new_record? ? "A" : "U"
+        unless article.save
+          mark << "E"
+          errors = article.errors.full_messages.join(" ")
+        end
+        {:mark => mark, :errors => errors}
       end
 
       def text_resolve?(str)
@@ -125,7 +110,7 @@ class Article < ActiveRecord::Base
       end
 
       def text_to_array(text)
-        text.split(/^-{80,}$/).find_all {|article| text_resolve?(article) }
+        text.split(/^-{80,}$/).find_all {|e| text_resolve?(e) }
       end
 
       def separator
@@ -142,7 +127,7 @@ class Article < ActiveRecord::Base
             e[:title] = string_normalize(md[:title])
           end
           if md = str.match(/^Tag:(?<tag_list>.+)$/i)
-            e[:tag_list] = string_normalize(md[:tag_list])
+            e[:tag_list] = ActsAsTaggableOn::TagListParser.parse(string_normalize(md[:tag_list]))
           end
           if md = str.match(/^#{text_separator}\n(?<body>.*)\z/mi)
             e[:body] = md[:body].strip
@@ -151,8 +136,8 @@ class Article < ActiveRecord::Base
       end
     end
 
-    def same_content?(other)
-      [title, body] == [other.title, other.body]
+    def same_content?(attrs)
+      [:title, :body].all? { |key| send(key) == attrs[key] } && tag_list.sort == attrs[:tag_list].sort
     end
 
     def to_text
