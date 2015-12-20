@@ -356,6 +356,7 @@
     (if (get-buffer buffname)
         (switch-to-buffer buffname)
       (switch-to-buffer buffname)
+      (memo-station-edit-mode)
       (insert "Title: \n"
               "Tag: \n"
               "--text follows this line--\n"
@@ -363,7 +364,7 @@
       (when t
         (beginning-of-buffer)       ; 「Title:」の直後にカーソル移動
         (move-end-of-line 1))
-      (memo-station-edit-mode))))
+      )))
 
 (defun memo-station-search (&optional tag)
   (interactive)
