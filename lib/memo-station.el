@@ -326,7 +326,7 @@
              (lambda (&key data &allow-other-keys)
                (memo-station-mode)
                (memo-station-goto-segment)
-               (message "%s" data)))))
+               (message "%s" (decode-coding-string data 'utf-8))))))
 
 (defun memo-station-edit-mode ()
   "\\{memo-station-edit-mode-map}"
@@ -384,7 +384,7 @@
                             (when (get-buffer buffname)
                               (kill-buffer buffname))
                             (switch-to-buffer buffname)
-                            (insert data)
+                            (insert (decode-coding-string data 'utf-8))
                             (goto-char (point-min))
                             (memo-station-mode)))))))
 
