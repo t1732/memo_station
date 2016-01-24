@@ -147,7 +147,7 @@ class Article < ActiveRecord::Base
       str << "Tag: #{tag_list}"
       str << "Date: #{created_at.to_s(:ymdhm)}"
       str << text_separator
-      str << "#{body}"
+      str << body.to_s
       str.join("\n") + "\n"
     end
   end

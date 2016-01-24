@@ -1,7 +1,7 @@
 inherit_from: .rubocop_todo.yml
 
 AllCops:
-  RunRailsCops: true
+  Rails: true
   DisplayCopNames: true
   DisplayStyleGuide: true
 

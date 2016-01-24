@@ -176,7 +176,7 @@ Style/StringLiterals:
 # Offense count: 13
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyleForMultiline, SupportedStyles.
-Style/TrailingComma:
+Style/TrailingCommaInLiteral:
   Exclude:
     - 'app/models/article.rb'
     - 'config/app_config.rb'
